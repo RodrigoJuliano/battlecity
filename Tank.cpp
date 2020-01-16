@@ -1,12 +1,13 @@
 #include "Tank.h"
 
-Tank::Tank(int id, Texture& tex, IntRect firstframe, Vec2 pos)
+Tank::Tank(int id, Texture& tex, IntRect firstframe)
 	:
-	Entity(id, tex, firstframe, 2, pos)
+	Entity(id, tex, firstframe, 2),
+	bullet(tex, { 131,102, 3,4 })
 {
 }
 
-void Tank::update(float dt, const Ground& grnd)
+void Tank::update(float dt, Ground& grnd)
 {
 	Entity::update(dt);
 
@@ -21,14 +22,14 @@ void Tank::update(float dt, const Ground& grnd)
 
 	// Left
 	auto r = getCollisionBox();
-	Block* b1 = grnd.GetBlock({ r.left, r.top });
-	Block* b2 = grnd.GetBlock({ r.left, r.top + r.height / 2 });
-	Block* b3 = grnd.GetBlock({ r.left, r.top + r.height });
+	int b1 = grnd.GetBlock({ r.left, r.top });
+	int b2 = grnd.GetBlock({ r.left, r.top + r.height / 2 });
+	int b3 = grnd.GetBlock({ r.left, r.top + r.height });
 
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block on the right
 		// basicaly get the relative ground position, sum 1 and convert back to screen position
-		setPosition({ ((int)floor((r.left - Gfx::EdgeSize) / grnd.blockSize) + 1) * grnd.blockSize + Gfx::EdgeSize + r.width / 2, p.y });
+		setPosition({ int(floor(r.left / grnd.blockSize) + 1) * grnd.blockSize + ceil(r.width / 2), p.y });
 	}
 	// right
 	r = getCollisionBox();
@@ -37,7 +38,7 @@ void Tank::update(float dt, const Ground& grnd)
 	b3 = grnd.GetBlock({ r.left + r.width, r.top + r.height });
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block on the left
-		setPosition({ ((int)ceil((r.left - Gfx::EdgeSize) / grnd.blockSize) + 1) * grnd.blockSize + Gfx::EdgeSize - ceil(r.width / 2), p.y });
+		setPosition({ int((r.left + r.width)/ grnd.blockSize) * grnd.blockSize - ceil(r.width / 2), p.y });
 	}
 
 	// Update the y coord
@@ -55,7 +56,7 @@ void Tank::update(float dt, const Ground& grnd)
 
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block below
-		setPosition({ p.x, ((int)floor((r.top - Gfx::EdgeSize) / grnd.blockSize) + 1) * grnd.blockSize + Gfx::EdgeSize + r.height / 2 });
+		setPosition({ p.x, int(floor(r.top / grnd.blockSize) + 1) * grnd.blockSize + ceil(r.height / 2) });
 	}
 	// down
 	r = getCollisionBox();
@@ -64,6 +65,23 @@ void Tank::update(float dt, const Ground& grnd)
 	b3 = grnd.GetBlock({ r.left + r.width / 2, r.top + r.height });
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block above
-		setPosition({ p.x, ((int)ceil((r.top - Gfx::EdgeSize) / grnd.blockSize) + 1) * grnd.blockSize + Gfx::EdgeSize - ceil(r.height / 2) });
+		setPosition({ p.x, int((r.top + r.height ) / grnd.blockSize) * grnd.blockSize - ceil(r.height / 2) });
 	}
+	
+	if (!bullet.Collided())
+		bullet.update(dt, grnd);
+}
+
+void Tank::fire()
+{
+	if (bullet.Collided()) {
+		bullet.spawn(getPosition());
+		bullet.setVel(GetDirection() * 200.f);
+	}
+}
+
+void Tank::onDraw(sf::RenderTarget& target, sf::RenderStates states) const
+{
+	if(!bullet.Collided())
+		target.draw(bullet, states);
 }

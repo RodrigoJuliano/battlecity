@@ -1,13 +1,14 @@
 #include "Bullet.h"
 
-Bullet::Bullet(Texture& tex, IntRect texRect, Vec2 pos) :
-	Entity(10, tex, texRect, 1, pos)
+Bullet::Bullet(Texture& tex, IntRect texRect)
+	:
+	Entity(10, tex, texRect, 1)
 {
 }
 
-bool Bullet::CollidesWith(const Block* b) const
+bool Bullet::CollidesWith(int block) const
 {
-	return Entity::CollidesWith(b) && b->getId() != 12;
+	return Entity::CollidesWith(block) && block != 12;
 }
 
 void Bullet::update(float dt, Ground& grnd)
@@ -27,41 +28,51 @@ void Bullet::update(float dt, Ground& grnd)
 	Vec2 p3 = { r.left + r.width, r.top + r.height };
 	Vec2 p4 = { r.left + r.width, r.top };
 
-	Block* b1 = grnd.GetBlock(p1);
-	Block* b2 = grnd.GetBlock(p2);
-	Block* b3 = grnd.GetBlock(p3);
-	Block* b4 = grnd.GetBlock(p4);
+	int b1 = grnd.GetBlock(p1);
+	int b2 = grnd.GetBlock(p2);
+	int b3 = grnd.GetBlock(p3);
+	int b4 = grnd.GetBlock(p4);
 
 	if (CollidesWith(b1)) {
-		grnd.setBlock(p1, nullptr);
+		if(b1 == 0)
+			grnd.setBlock(p1, -1);
 		collided = true;
 	}
 	if (CollidesWith(b2)) {
-		grnd.setBlock(p2, nullptr);
+		if (b2 == 0)
+			grnd.setBlock(p2, -1);
 		collided = true;
 	}
 	if (CollidesWith(b3)) {
-		grnd.setBlock(p3, nullptr);
+		if (b3 == 0)
+			grnd.setBlock(p3, -1);
 		collided = true;
 	}
 	if (CollidesWith(b4)) {
-		grnd.setBlock(p4, nullptr);
+		if (b4 == 0)
+			grnd.setBlock(p4, -1);
 		collided = true;
 	}
 }
 
-bool Bullet::Collided()
+bool Bullet::Collided() const
 {
 	return collided;
+}
+
+void Bullet::spawn(Vec2 pos)
+{
+	collided = false;
+	setPosition(pos);
 }
 
 FloatRect Bullet::getCollisionBox() const
 {
 	auto r = getGlobalBounds();
-	// reduce the box a little bit
+	// increase the box a little bit
 	r.top -= 2;
 	r.left -= 2;
-	r.height += 3;
-	r.width += 3;
+	r.height += 4;
+	r.width += 4;
 	return r;
 }

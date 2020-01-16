@@ -4,38 +4,38 @@
 
 Game::Game(RenderWindow& mWindow)
     :
-    mWindow(mWindow)
+    mWindow(mWindow),
+    grnd(texture),
+    area_grnd(mWindow, Vec2(Gfx::EdgeSize, Gfx::EdgeSize))
 {
     texture.loadFromFile("textures.png");
 
-    loadBlocks();
+    player = new Tank(0, texture, { 0,0,13,13 });
+    player->setPosition({ 100.f, 100.f });
 
-    //player = new Entity(0, texture, { 0,16*3,16,16 }, { 400.f, 400.f });
-    //player->setOrigin({ Gfx::TextureResolution * 0.5f , Gfx::TextureResolution * 0.5f  });
-    //player->setScale(Gfx::TextureScaleMult, Gfx::TextureScaleMult);
-
-    player = new Tank(0, texture, { 32,1,15,15 }, { 400.f, 400.f });
-    player->setOrigin({ 15 * 0.5f, 15 * 0.5f});
-    player->setScale(Gfx::TextureScaleMult, Gfx::TextureScaleMult);
-
+    // screen edges
+    edges.setSize({ Gfx::ScreenWidth, Gfx::ScreenHeight });
+    edges.setPosition(0.f, 0.f);
+    edges.setFillColor(Color::Transparent);
+    edges.setOutlineColor(Color(99, 99, 99));
+    edges.setOutlineThickness(-Gfx::EdgeSize);
 }
 
 void Game::update(float dt)
 {
 
-    Vec2 mp = Vec2(Mouse::getPosition(mWindow));
-
+    Vec2 mp = Vec2(Mouse::getPosition(mWindow)) - area_grnd.getOrigin();
     if (Mouse::isButtonPressed(Mouse::Right)) {
-        grnd.setBlock(mp, nullptr);
+        grnd.setBlock(mp, -1);
     }
 
     if (Mouse::isButtonPressed(Mouse::Left)) {
-        grnd.setBlock(mp, Block::mBlocks[id]);
+        grnd.setBlock(mp, id);
     }
 
     bool toggleBlockPressed_new = Keyboard::isKeyPressed(Keyboard::LControl);
     if(!toggleBlockPressed && toggleBlockPressed_new){
-        if (id == 13)
+        if (id == 12)
             id = 0;
         else
             id++;
@@ -62,29 +62,11 @@ void Game::update(float dt)
     
     bool firePressed_new = Keyboard::isKeyPressed(Keyboard::RShift);
     if (!firePressed && firePressed_new) {
-        Vec2 ppos = player->getPosition();
-        Bullet* b = new Bullet(texture, {131,102, 3,4}, ppos);
-        b->setOrigin({2.f,1.5f});
-        b->setScale(Gfx::TextureScaleMult, Gfx::TextureScaleMult);
-        b->setVel(player->GetDirection() * 200.f);
-        bullets.push_back(b);
+        player->fire();
     }
     firePressed = firePressed_new; 
 
     player->update(dt, grnd);
-
-    if (bullets.size() > 40) {
-        for (int i = bullets.size()-1; i >= 0; i--) {
-            if (bullets.at(i)->Collided()) {
-                delete bullets.at(i);
-                bullets.erase(bullets.begin() + i);
-            }
-        }
-    }
-
-    for (auto b : bullets)
-        if(!b->Collided())
-            b->update(dt, grnd);
 
     grnd.update(dt);
 }
@@ -92,13 +74,10 @@ void Game::update(float dt)
 void Game::draw()
 {
     mWindow.clear(Color::Black);
+    mWindow.draw(edges);
 
-    mWindow.draw(*player);
-    grnd.Draw(mWindow);
-
-    for (auto b : bullets)
-        if (!b->Collided())
-            mWindow.draw(*b);
+    area_grnd.draw(*player);
+    area_grnd.draw(grnd);
 
     // player collision box
     auto p = player->getCollisionBox();
@@ -107,20 +86,7 @@ void Game::draw()
     r.setOutlineThickness(-1);
     r.setFillColor(Color::Transparent);
     r.setPosition({p.left, p.top});
-    mWindow.draw(r);
+    area_grnd.draw(r);
 
     mWindow.display();
-}
-
-
-void Game::loadBlocks() {
-    int id = 0;
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 4; j++) {
-            Block::mBlocks[id] = new Block(id, texture, IntRect(64 + 8 * j, 8 * i, 8, 8));
-            Block::mBlocks[id]->setScale(Gfx::TextureScaleMult, Gfx::TextureScaleMult);
-            id++;
-        }
-    Block::mBlocks[id] = new Block(id, texture, IntRect(64, 24, 8, 8), 3);
-    Block::mBlocks[id]->setScale(Gfx::TextureScaleMult, Gfx::TextureScaleMult);
 }

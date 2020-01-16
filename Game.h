@@ -4,6 +4,7 @@
 #include "Ground.h"
 #include "Tank.h"
 #include "Bullet.h"
+#include "ScreenArea.h"
 
 using namespace std;
 using namespace sf;
@@ -18,11 +19,14 @@ private:
 	Tank* player;
 	bool toggleBlockPressed = false;
 	bool firePressed = false;
-	vector<Bullet*> bullets;
+	vector<Entity*> entities;
+	//vector<Bullet*> bullets;
+	ScreenArea area_grnd;
+	// screen edges
+	RectangleShape edges;
 public:
 	Game(RenderWindow& mWindow);
 	void update(float dt);
 	void draw();
-	void loadBlocks();
 };
 

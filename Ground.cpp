@@ -1,71 +1,122 @@
 #include "Ground.h"
 
-Block* Ground::GetBlock(const Vec2& pos) const
+int Ground::GetBlock(const Vec2& pos) const
 {
 	Vei2 gp = toGroundPos(pos);
 	// Trick to entities stay inside the map
 	if (gp.x < 0 || gp.x > cols-1 || gp.y < 0 || gp.y > rows-1)
-		return Block::mBlocks[0];
+		return 0;
 	return mGround[gp.x][gp.y];
-}
-
-Vec2 Ground::toScreenPos(const Vei2& p) const
-{
-	return {float(p.x * blockSize) + Gfx::EdgeSize, float(p.y * blockSize) + Gfx::EdgeSize };
 }
 
 Vei2 Ground::toGroundPos(const Vec2& p) const
 {
-	return {(int)floor((p.x - Gfx::EdgeSize) / blockSize),
-		(int)floor((p.y - Gfx::EdgeSize) / blockSize)};
+	return {(int)floor(p.x / blockSize),
+		(int)floor(p.y / blockSize)};
 }
 
-void Ground::setBlock(const Vec2& pos, Block* block)
+void Ground::setBlock(const Vec2& pos, int block)
 {
 	Vei2 gp = toGroundPos(pos);
 	if (gp.x >= 0 && gp.x < cols &&
 		gp.y >= 0 && gp.y < rows)
 	{
 		mGround[gp.x][gp.y] = block;
-	}
-}
 
-Ground::Ground()
-{
-	edges.setSize({ Gfx::ScreenWidth, Gfx::ScreenHeight });
-	edges.setPosition(0.f, 0.f);
-	edges.setFillColor(Color::Transparent);
-	edges.setOutlineColor(Color(99, 99, 99));
-	edges.setOutlineThickness(-Gfx::EdgeSize);
-}
+		sf::Vertex* quad = &m_vertices[(gp.x + gp.y * cols) * 4];
 
-void Ground::Draw(RenderWindow& rw)
-{
-	// blocks
-	for (int i = 0; i < cols; ++i)
-	{
-		for (int j = 0; j < rows; ++j)
-		{
-			Block* b = mGround[i][j];
-			if (b != nullptr)
-			{
-				b->setPosition(toScreenPos({ i, j }));
-				rw.draw(*b);
-			}
+		if (block != -1) {
+			
+			int id = block;
+			// find its position in the tileset texture
+			int tu = (id) % 4; // 4 tiles per row
+			int tv = id / 4;
+
+			// define its 4 texture coordinates
+			quad[0].texCoords = Vec2(64 + tu * Gfx::TextureResolution, tv * Gfx::TextureResolution);
+			quad[1].texCoords = Vec2(64 + (tu + 1) * Gfx::TextureResolution, tv * Gfx::TextureResolution);
+			quad[2].texCoords = Vec2(64 + (tu + 1) * Gfx::TextureResolution, (tv + 1) * Gfx::TextureResolution);
+			quad[3].texCoords = Vec2(64 + tu * Gfx::TextureResolution, (tv + 1) * Gfx::TextureResolution);
+		}
+		else {
+			quad[0].texCoords =
+				quad[1].texCoords =
+				quad[2].texCoords =
+				quad[3].texCoords = Vec2(0.f, 0.f);
 		}
 	}
-
-	// edges
-	rw.draw(edges);
 }
 
+Ground::Ground(Texture& tex)
+	:
+	m_tex(tex)
+{
+	m_vertices.setPrimitiveType(sf::Quads);
+	m_vertices.resize(cols * rows * 4);
 
-FloatRect Ground::getBlockBoundsAt(const Vec2& p) const {
-	Vei2 gp = toGroundPos(p);
-	return { float(gp.x * blockSize), float(gp.y * blockSize), float(blockSize), float(blockSize) };
+	for (unsigned int i = 0; i < cols; ++i)
+		for (unsigned int j = 0; j < rows; ++j)
+		{
+			// initializes with empty
+			mGround[i][j] = -1;
+
+			// get a pointer to the current tile's quad
+			sf::Vertex* quad = &m_vertices[(i + j * cols) * 4];
+
+			// define its 4 corners
+			quad[0].position = Vec2(i * blockSize, j * blockSize);
+			quad[1].position = Vec2((i + 1) * blockSize, j * blockSize);
+			quad[2].position = Vec2((i + 1) * blockSize, (j + 1) * blockSize);
+			quad[3].position = Vec2(i * blockSize, (j + 1) * blockSize);
+		}
 }
 
 void Ground::update(float dt)
 {
-	Block::mBlocks[12]->update(dt);
+	if (curframetime > spf) {
+		curframetime = 0.0f;
+		// change the frame
+		curFrame++;
+		if (curFrame > nFrames - 1)
+			curFrame = 0;
+	}
+	else {
+		curframetime += dt;
+	}
+
+	for (unsigned int i = 0; i < cols; ++i)
+		for (unsigned int j = 0; j < rows; ++j) {
+
+			int id;
+			if (mGround[i][j] != -1 &&
+				(id = mGround[i][j]) > 11) {
+
+				// get a pointer to the current tile's quad
+				sf::Vertex* quad = &m_vertices[(i + j * cols) * 4];
+
+				// find its position in the tileset texture
+				int tu = (id + curFrame) % 4; // 4 tiles per row
+				int tv = id / 4;
+
+				// define its 4 texture coordinates
+				quad[0].texCoords = Vec2(64 + tu * Gfx::TextureResolution, tv * Gfx::TextureResolution);
+				quad[1].texCoords = Vec2(64 + (tu + 1) * Gfx::TextureResolution, tv * Gfx::TextureResolution);
+				quad[2].texCoords = Vec2(64 + (tu + 1) * Gfx::TextureResolution, (tv + 1) * Gfx::TextureResolution);
+				quad[3].texCoords = Vec2(64 + tu * Gfx::TextureResolution, (tv + 1) * Gfx::TextureResolution);
+			}
+		}
+}
+
+void Ground::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
+	// apply the transform
+	states.transform *= getTransform();
+	// apply the tileset texture
+	states.texture = &m_tex;
+
+	// draw the vertex array
+	target.draw(m_vertices, states);
+
+	// edges
+	//target.draw(edges);
 }

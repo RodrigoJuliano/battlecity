@@ -1,13 +1,25 @@
 #include "Entity.h"
 #include <SFML/Graphics/Rect.hpp>
 
-Entity::Entity(int id, Texture& tex, IntRect firstframe, int nFrames, Vec2 pos)
+Entity::Entity(int id, Texture& tex, IntRect firstframe, int nFrames)
 	:
-	Sprite(tex, firstframe),
-	firstframe(firstframe),
+	id(id),
+	texture(tex),
+	fframe(firstframe),
 	nFrames(nFrames)
 {
-	setPosition(pos);
+	shape[0].position = Vec2( 0.f, 0.f );
+	shape[1].position = Vec2( fframe.width, 0.f );
+	shape[2].position = Vec2( fframe.width, fframe.height );
+	shape[3].position = Vec2( 0.f, fframe.height );
+
+	shape[0].texCoords = Vec2(fframe.left , fframe.top);
+	shape[1].texCoords = Vec2(fframe.left + fframe.width , fframe.top);
+	shape[2].texCoords = Vec2(fframe.left + fframe.width, fframe.top + fframe.height);
+	shape[3].texCoords = Vec2(fframe.left , fframe.top + fframe.height);
+
+	setOrigin({ fframe.width * 0.5f, fframe.height * 0.5f });
+	setScale(Gfx::TextureScaleMult, Gfx::TextureScaleMult);
 }
 
 Vec2 Entity::GetVel() const
@@ -20,9 +32,9 @@ void Entity::setVel(Vec2 vel)
 	velocity = vel;
 }
 
-bool Entity::CollidesWith(const Block* b) const
+bool Entity::CollidesWith(int block) const
 {
-	return (b != nullptr && b->getId() != 2);
+	return (block != -1 && block != 2);
 }
 
 void Entity::update(float dt)
@@ -33,11 +45,14 @@ void Entity::update(float dt)
 			if (curframetime > spf) {
 				curframetime = 0.0f;
 				// change the frame
-				IntRect r = getTextureRect();
-				if (r.left == firstframe.left + (r.width+1) * (nFrames-1))
-					setTextureRect(firstframe);
-				else
-					setTextureRect({ r.left + r.width+1, r.top, r.width, r.height });
+				curFrame++;
+				if (curFrame > nFrames - 1)
+					curFrame = 0;
+
+				shape[0].texCoords = Vec2( fframe.left + fframe.width * curFrame, fframe.top );
+				shape[1].texCoords = Vec2( fframe.left + fframe.width * (curFrame + 1), fframe.top );
+				shape[2].texCoords = Vec2(fframe.left + fframe.width * (curFrame + 1), fframe.top + fframe.height);
+				shape[3].texCoords = Vec2( fframe.left + fframe.width * curFrame, fframe.top + fframe.height );
 			}
 			else {
 				curframetime += dt;
@@ -64,10 +79,10 @@ FloatRect Entity::getCollisionBox() const
 {
 	auto r = getGlobalBounds();
 	// reduce the box a little bit
-	r.top += 2;
-	r.left += 2;
-	r.height -= 3;
-	r.width -= 3;
+	r.top += 3;
+	r.left += 3;
+	r.height -= 6;
+	r.width -= 6;
 	return r;
 }
 
@@ -82,5 +97,24 @@ Vec2 Entity::GetDirection() const
 		return { 0.f,1.f };
 	//if(r == 270.f)
 		return { -1.f,0.f };
+}
+
+FloatRect Entity::getGlobalBounds() const
+{
+	FloatRect r(shape[0].position, Vec2( fframe.width, fframe.height ));
+	
+	auto t = getTransform();
+
+	auto tr = t.transformRect(r);
+
+	return tr;
+}
+
+void Entity::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
+	onDraw(target, states);
+	states.transform *= getTransform();
+	states.texture = &texture;
+	target.draw(shape, states);
 }
 
