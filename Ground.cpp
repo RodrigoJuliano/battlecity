@@ -49,6 +49,7 @@ void Ground::setBlock(const Vec2& pos, int block)
 
 Ground::Ground(Texture& tex)
 	:
+	Animable(3, 0.3f),
 	m_tex(tex)
 {
 	m_vertices.setPrimitiveType(sf::Quads);
@@ -73,17 +74,22 @@ Ground::Ground(Texture& tex)
 
 void Ground::update(float dt)
 {
-	if (curframetime > spf) {
-		curframetime = 0.0f;
-		// change the frame
-		curFrame++;
-		if (curFrame > nFrames - 1)
-			curFrame = 0;
-	}
-	else {
-		curframetime += dt;
-	}
+	Animable::update(dt);
+}
 
+void Ground::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
+	// apply the transform
+	states.transform *= getTransform();
+	// apply the tileset texture
+	states.texture = &m_tex;
+
+	// draw the vertex array
+	target.draw(m_vertices, states);
+}
+
+void Ground::onFrameChanged()
+{
 	for (unsigned int i = 0; i < cols; ++i)
 		for (unsigned int j = 0; j < rows; ++j) {
 
@@ -105,18 +111,4 @@ void Ground::update(float dt)
 				quad[3].texCoords = Vec2(64 + tu * Gfx::TextureResolution, (tv + 1) * Gfx::TextureResolution);
 			}
 		}
-}
-
-void Ground::draw(sf::RenderTarget& target, sf::RenderStates states) const
-{
-	// apply the transform
-	states.transform *= getTransform();
-	// apply the tileset texture
-	states.texture = &m_tex;
-
-	// draw the vertex array
-	target.draw(m_vertices, states);
-
-	// edges
-	//target.draw(edges);
 }

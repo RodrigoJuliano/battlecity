@@ -62,11 +62,35 @@ void Game::update(float dt)
     
     bool firePressed_new = Keyboard::isKeyPressed(Keyboard::RShift);
     if (!firePressed && firePressed_new) {
-        player->fire();
+        entities.emplace_front(new Bullet(texture, { 131,102, 3,4 }, player->GetDirection() * 200.f));
+        entities.front()->setPosition(player->getPosition());
     }
-    firePressed = firePressed_new; 
+    firePressed = firePressed_new;
 
     player->update(dt, grnd);
+
+    for (auto it = entities.begin(); it != entities.end(); ++it) {
+        (*it)->update(dt, grnd);
+        if (Explosion* e = dynamic_cast<Explosion*>(*it)) {
+            if (e->finishedAnim()) {
+                delete e;
+                it = entities.erase(it);
+            }
+        }
+        else if (Bullet* b = dynamic_cast<Bullet*>(*it)) {
+            if (b->Collided()) {
+                entities.emplace_front(new Explosion(texture, { 64, 128, 16, 16 }, 3));
+                entities.front()->setPosition(b->getPosition());
+                delete b;
+                it = entities.erase(it);
+            }
+        }
+
+        // erasing a item move 'it' to next position
+        // then need to check before calling ++it
+        if (it == entities.end())
+            break;
+    }
 
     grnd.update(dt);
 }
@@ -78,6 +102,8 @@ void Game::draw()
 
     area_grnd.draw(*player);
     area_grnd.draw(grnd);
+    for(auto e : entities)
+        area_grnd.draw(*e);
 
     // player collision box
     auto p = player->getCollisionBox();

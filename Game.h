@@ -5,6 +5,7 @@
 #include "Tank.h"
 #include "Bullet.h"
 #include "ScreenArea.h"
+#include <list>
 
 using namespace std;
 using namespace sf;
@@ -19,8 +20,7 @@ private:
 	Tank* player;
 	bool toggleBlockPressed = false;
 	bool firePressed = false;
-	vector<Entity*> entities;
-	//vector<Bullet*> bullets;
+	list<Entity*> entities;
 	ScreenArea area_grnd;
 	// screen edges
 	RectangleShape edges;

@@ -1,12 +1,12 @@
 #include "Entity.h"
 #include <SFML/Graphics/Rect.hpp>
 
-Entity::Entity(int id, Texture& tex, IntRect firstframe, int nFrames)
+Entity::Entity(Texture& tex, IntRect firstframe, int nFrames)
 	:
-	id(id),
+	Animable(nFrames, 0.1f),
+	id(0),
 	texture(tex),
-	fframe(firstframe),
-	nFrames(nFrames)
+	fframe(firstframe)
 {
 	shape[0].position = Vec2( 0.f, 0.f );
 	shape[1].position = Vec2( fframe.width, 0.f );
@@ -30,34 +30,6 @@ Vec2 Entity::GetVel() const
 void Entity::setVel(Vec2 vel)
 {
 	velocity = vel;
-}
-
-bool Entity::CollidesWith(int block) const
-{
-	return (block != -1 && block != 2);
-}
-
-void Entity::update(float dt)
-{
-	if(nFrames > 1)
-		// only animate if are moving
-		if (abs(velocity.x) > 0.f || abs(velocity.y) > 0.f) {
-			if (curframetime > spf) {
-				curframetime = 0.0f;
-				// change the frame
-				curFrame++;
-				if (curFrame > nFrames - 1)
-					curFrame = 0;
-
-				shape[0].texCoords = Vec2( fframe.left + fframe.width * curFrame, fframe.top );
-				shape[1].texCoords = Vec2( fframe.left + fframe.width * (curFrame + 1), fframe.top );
-				shape[2].texCoords = Vec2(fframe.left + fframe.width * (curFrame + 1), fframe.top + fframe.height);
-				shape[3].texCoords = Vec2( fframe.left + fframe.width * curFrame, fframe.top + fframe.height );
-			}
-			else {
-				curframetime += dt;
-			}
-		}
 
 	// Rotate the sprite
 
@@ -73,6 +45,16 @@ void Entity::update(float dt)
 	else if (velocity.y > 0.0f) {
 		setRotation(180.0f); // Down
 	}
+}
+
+bool Entity::CollidesWith(int block) const
+{
+	return (block != -1 && block != 2);
+}
+
+void Entity::update(float dt, Ground& grnd)
+{
+	Animable::update(dt);
 }
 
 FloatRect Entity::getCollisionBox() const
@@ -110,11 +92,23 @@ FloatRect Entity::getGlobalBounds() const
 	return tr;
 }
 
+Texture& Entity::getTexture() const
+{
+	return texture;
+}
+
 void Entity::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	onDraw(target, states);
 	states.transform *= getTransform();
 	states.texture = &texture;
 	target.draw(shape, states);
+}
+
+void Entity::onFrameChanged()
+{
+	shape[0].texCoords = Vec2(fframe.left + fframe.width * curFrame, fframe.top);
+	shape[1].texCoords = Vec2(fframe.left + fframe.width * (curFrame + 1), fframe.top);
+	shape[2].texCoords = Vec2(fframe.left + fframe.width * (curFrame + 1), fframe.top + fframe.height);
+	shape[3].texCoords = Vec2(fframe.left + fframe.width * curFrame, fframe.top + fframe.height);
 }
 

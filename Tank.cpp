@@ -2,14 +2,15 @@
 
 Tank::Tank(int id, Texture& tex, IntRect firstframe)
 	:
-	Entity(id, tex, firstframe, 2),
-	bullet(tex, { 131,102, 3,4 })
+	Entity(tex, firstframe, 2)
 {
 }
 
 void Tank::update(float dt, Ground& grnd)
 {
-	Entity::update(dt);
+	// only update direction and animation if are moving
+	if (abs(velocity.x) > 0.f || abs(velocity.y) > 0.f)
+		Entity::update(dt, grnd);
 
 	// Do the entity move checking for collision with map
 
@@ -67,21 +68,4 @@ void Tank::update(float dt, Ground& grnd)
 		// set the x position back to the empty block above
 		setPosition({ p.x, int((r.top + r.height ) / grnd.blockSize) * grnd.blockSize - ceil(r.height / 2) });
 	}
-	
-	if (!bullet.Collided())
-		bullet.update(dt, grnd);
-}
-
-void Tank::fire()
-{
-	if (bullet.Collided()) {
-		bullet.spawn(getPosition());
-		bullet.setVel(GetDirection() * 200.f);
-	}
-}
-
-void Tank::onDraw(sf::RenderTarget& target, sf::RenderStates states) const
-{
-	if(!bullet.Collided())
-		target.draw(bullet, states);
 }

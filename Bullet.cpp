@@ -1,9 +1,10 @@
 #include "Bullet.h"
 
-Bullet::Bullet(Texture& tex, IntRect texRect)
+Bullet::Bullet(Texture& tex, IntRect texRect, Vec2 velocity)
 	:
-	Entity(10, tex, texRect, 1)
+	Entity(tex, texRect, 1)
 {
+	setVel(velocity);
 }
 
 bool Bullet::CollidesWith(int block) const
@@ -13,7 +14,7 @@ bool Bullet::CollidesWith(int block) const
 
 void Bullet::update(float dt, Ground& grnd)
 {
-	Entity::update(dt);
+	Entity::update(dt, grnd);
 
 	// Do the entity move checking for collision with map
 
@@ -34,7 +35,7 @@ void Bullet::update(float dt, Ground& grnd)
 	int b4 = grnd.GetBlock(p4);
 
 	if (CollidesWith(b1)) {
-		if(b1 == 0)
+		if (b1 == 0)
 			grnd.setBlock(p1, -1);
 		collided = true;
 	}
@@ -58,12 +59,6 @@ void Bullet::update(float dt, Ground& grnd)
 bool Bullet::Collided() const
 {
 	return collided;
-}
-
-void Bullet::spawn(Vec2 pos)
-{
-	collided = false;
-	setPosition(pos);
 }
 
 FloatRect Bullet::getCollisionBox() const

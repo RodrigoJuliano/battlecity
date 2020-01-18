@@ -157,14 +157,17 @@
     <ClCompile Include="batlecity.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Ground.cpp" />
     <ClCompile Include="Tank.cpp" />
     <ClCompile Include="ScreenArea.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animable.h" />
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="Entity.h" />
+    <ClInclude Include="Explosion.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Ground.h" />
