@@ -21,29 +21,32 @@ void Ground::setBlock(const Vec2& pos, int block)
 	if (gp.x >= 0 && gp.x < cols &&
 		gp.y >= 0 && gp.y < rows)
 	{
-		mGround[gp.x][gp.y] = block;
+		setBlock(gp.x, gp.y, block);
+	}
+}
 
-		sf::Vertex* quad = &m_vertices[(gp.x + gp.y * cols) * 4];
+void Ground::setBlock(int x, int y, int block)
+{
+	mGround[x][y] = block;
 
-		if (block != -1) {
-			
-			int id = block;
-			// find its position in the tileset texture
-			int tu = (id) % 4; // 4 tiles per row
-			int tv = id / 4;
+	sf::Vertex* quad = &m_vertices[(x + y * cols) * 4];
 
-			// define its 4 texture coordinates
-			quad[0].texCoords = Vec2(64 + tu * Gfx::TextureResolution, tv * Gfx::TextureResolution);
-			quad[1].texCoords = Vec2(64 + (tu + 1) * Gfx::TextureResolution, tv * Gfx::TextureResolution);
-			quad[2].texCoords = Vec2(64 + (tu + 1) * Gfx::TextureResolution, (tv + 1) * Gfx::TextureResolution);
-			quad[3].texCoords = Vec2(64 + tu * Gfx::TextureResolution, (tv + 1) * Gfx::TextureResolution);
-		}
-		else {
-			quad[0].texCoords =
-				quad[1].texCoords =
-				quad[2].texCoords =
-				quad[3].texCoords = Vec2(0.f, 0.f);
-		}
+	if (block != -1) {
+		// find its position in the tileset texture
+		int tu = block % 4; // 4 tiles per row
+		int tv = block / 4;
+
+		// define its 4 texture coordinates
+		quad[0].texCoords = Vec2(64 + tu * Gfx::TextureResolution, tv * Gfx::TextureResolution);
+		quad[1].texCoords = Vec2(64 + (tu + 1) * Gfx::TextureResolution, tv * Gfx::TextureResolution);
+		quad[2].texCoords = Vec2(64 + (tu + 1) * Gfx::TextureResolution, (tv + 1) * Gfx::TextureResolution);
+		quad[3].texCoords = Vec2(64 + tu * Gfx::TextureResolution, (tv + 1) * Gfx::TextureResolution);
+	}
+	else {
+		quad[0].texCoords =
+			quad[1].texCoords =
+			quad[2].texCoords =
+			quad[3].texCoords = Vec2(0.f, 0.f);
 	}
 }
 

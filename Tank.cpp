@@ -31,6 +31,7 @@ void Tank::update(float dt, Ground& grnd)
 		// set the x position back to the empty block on the right
 		// basicaly get the relative ground position, sum 1 and convert back to screen position
 		setPosition({ int(floor(r.left / grnd.blockSize) + 1) * grnd.blockSize + ceil(r.width / 2), p.y });
+		onCollidLeft();
 	}
 	// right
 	r = getCollisionBox();
@@ -40,6 +41,7 @@ void Tank::update(float dt, Ground& grnd)
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block on the left
 		setPosition({ int((r.left + r.width)/ grnd.blockSize) * grnd.blockSize - ceil(r.width / 2), p.y });
+		onCollidRigth();
 	}
 
 	// Update the y coord
@@ -58,6 +60,7 @@ void Tank::update(float dt, Ground& grnd)
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block below
 		setPosition({ p.x, int(floor(r.top / grnd.blockSize) + 1) * grnd.blockSize + ceil(r.height / 2) });
+		onCollidUp();
 	}
 	// down
 	r = getCollisionBox();
@@ -67,5 +70,25 @@ void Tank::update(float dt, Ground& grnd)
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block above
 		setPosition({ p.x, int((r.top + r.height ) / grnd.blockSize) * grnd.blockSize - ceil(r.height / 2) });
+		onCollidDown();
 	}
+}
+
+bool Tank::tryFire()
+{
+	if (fireCounter < maxFire) {
+		fireCounter++;
+		return true;
+	}
+	return false;
+}
+
+void Tank::decFireCount()
+{
+	fireCounter--;
+}
+
+int Tank::getFireCount()
+{
+	return fireCounter;
 }

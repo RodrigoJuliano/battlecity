@@ -16,6 +16,7 @@ private:
 	int mGround[cols][rows];
 	sf::VertexArray m_vertices;
 	sf::Texture& m_tex;
+	void setBlock(int x, int y, int block);
 public:
 	Ground(Texture& tex);
 	void setBlock(const Vec2& pos, int);

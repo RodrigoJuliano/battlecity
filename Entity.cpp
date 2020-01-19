@@ -61,10 +61,10 @@ FloatRect Entity::getCollisionBox() const
 {
 	auto r = getGlobalBounds();
 	// reduce the box a little bit
-	r.top += 3;
-	r.left += 3;
-	r.height -= 6;
-	r.width -= 6;
+	//r.top += 3;
+	//r.left += 3;
+	//r.height -= 6;
+	//r.width -= 6;
 	return r;
 }
 
