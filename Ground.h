@@ -22,7 +22,10 @@ public:
 	void setBlock(const Vec2& pos, int);
 	int GetBlock(const Vec2& pos) const;
 	Vei2 toGroundPos(const Vec2& p) const;
-	void update(float dt);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 	virtual void onFrameChanged();
+	bool saveToFile(std::string file);
+	bool loadFromFile(std::string file);
+	int getBlockSize();
+	int getNCols();
 };

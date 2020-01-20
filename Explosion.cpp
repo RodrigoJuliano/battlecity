@@ -2,7 +2,7 @@
 
 Explosion::Explosion(Texture& tex, IntRect firstframe, int nFrames)
 	:
-	Entity(tex, firstframe, nFrames)
+	Entity(tex, firstframe, nFrames, 0.f)
 {
 
 }

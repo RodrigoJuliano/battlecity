@@ -1,8 +1,8 @@
 #include "Enemy.h"
 
-Enemy::Enemy(int id, Texture& tex, IntRect firstframe, mt19937& rng)
+Enemy::Enemy(int id, Texture& tex, IntRect firstframe, mt19937& rng, int health)
 	:
-	Tank(id, tex, firstframe),
+	Tank(id, tex, firstframe, health),
 	rng(rng),
 	onColDirDis(0,30),
 	anyTimeDirDis(0.f, 1.f),
@@ -18,6 +18,11 @@ void Enemy::update(float dt, Ground& grnd)
 
 	if (abs(anyTimeDirDis(rng)) > 3.f) {
 		swap(vel.x, vel.y);
+		if(fireDis(rng) > 50)
+			if (abs(vel.x) > 0.f)
+				vel.x *= -1;
+			else if (abs(vel.y) > 0.f)
+				vel.y *= -1;
 	}
 
 	setVel(vel);
@@ -116,14 +121,4 @@ void Enemy::onCollidRigth()
 	}
 
 	setVel(vel);
-}
-
-void Enemy::setExploded()
-{
-	exploded = true;
-}
-
-bool Enemy::getExploded()
-{
-	return exploded;
 }

@@ -2,7 +2,7 @@
 
 Bullet::Bullet(Texture& tex, IntRect texRect, Vec2 velocity)
 	:
-	Entity(tex, texRect, 1)
+	Entity(tex, texRect, 1, 14.f)
 {
 	setVel(velocity);
 }
@@ -59,15 +59,4 @@ void Bullet::update(float dt, Ground& grnd)
 bool Bullet::Collided() const
 {
 	return collided;
-}
-
-FloatRect Bullet::getCollisionBox() const
-{
-	auto r = getGlobalBounds();
-	// increase the box a little bit
-	r.top -= 2;
-	r.left -= 2;
-	r.height += 4;
-	r.width += 4;
-	return r;
 }

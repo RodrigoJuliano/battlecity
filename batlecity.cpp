@@ -19,8 +19,8 @@ int main()
             if (e.type == Event::Closed)
                 mWindow.close();
         }
-       /* if (!mWindow.hasFocus())
-            continue;*/
+        if (!mWindow.hasFocus())
+            continue;
 
         Time dt = clock.restart();
         float dtAsSeconds = dt.asSeconds();

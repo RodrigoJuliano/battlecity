@@ -7,12 +7,20 @@ Game::Game(RenderWindow& mWindow)
     mWindow(mWindow),
     grnd(texture),
     area_grnd(mWindow, Vec2(Gfx::EdgeSize, Gfx::EdgeSize)),
-    rng(rd())
+    rng(rd()),
+    enemyPosDist(0, 2),
+    enemySpawnDist(0, 100),
+    enemyTypeDist(0, 3)
 {
-    texture.loadFromFile("textures.png");
+    texture.loadFromFile("resources\\textures.png");
+
+    grnd.loadFromFile("resources\\level1.txt");
+
+    int bs = grnd.getBlockSize();
+    pSpawnPos = Vec2(bs * 9.f, bs * 25.f);
 
     player = new Tank(0, texture, { 0,0,13,13 });
-    player->setPosition({ 100.f, 100.f });
+    player->setPosition(pSpawnPos);
 
     // screen edges
     edges.setSize({ Gfx::ScreenWidth, Gfx::ScreenHeight });
@@ -24,12 +32,11 @@ Game::Game(RenderWindow& mWindow)
 
 void Game::update(float dt)
 {
-
+    // Ground editing
     Vec2 mp = Vec2(Mouse::getPosition(mWindow)) - area_grnd.getOrigin();
     if (Mouse::isButtonPressed(Mouse::Right)) {
         grnd.setBlock(mp, -1);
     }
-
     if (Mouse::isButtonPressed(Mouse::Left)) {
         grnd.setBlock(mp, id);
     }
@@ -44,23 +51,31 @@ void Game::update(float dt)
     }
     toggleBlockPressed = toggleBlockPressed_new;
 
+    bool spawnEnPressed_new = Keyboard::isKeyPressed(Keyboard::LControl);
+    if (!spawnEnPressed && spawnEnPressed_new) {
 
+        grnd.saveToFile("level2.txt");
+        //grnd.loadFromFile("level1.txt");
+    }
+    spawnEnPressed = spawnEnPressed_new;
+
+    // Player move
     if (Keyboard::isKeyPressed(Keyboard::W)) {
-        player->setVel({0.0f, -150.0f});
+        player->setVel({0.0f, -100.0f});
     }
     else if (Keyboard::isKeyPressed(Keyboard::S)) {
-        player->setVel({ 0.0f, 150.0f });
+        player->setVel({ 0.0f, 100.0f });
     }
     else if (Keyboard::isKeyPressed(Keyboard::A)) {
-        player->setVel({ -150.0f, 0.0f });
+        player->setVel({ -100.0f, 0.0f });
     }
     else if (Keyboard::isKeyPressed(Keyboard::D)) {
-        player->setVel({ 150.0f, 0.0f });
+        player->setVel({ 100.0f, 0.0f });
     }
     else {
         player->setVel({ 0.0f, 0.0f });
     }
-    
+    // Player fire
     bool firePressed_new = Keyboard::isKeyPressed(Keyboard::RShift);
     if (!firePressed && firePressed_new) {
         if (player->tryFire()) {
@@ -70,16 +85,9 @@ void Game::update(float dt)
     }
     firePressed = firePressed_new;
 
-    bool spawnEnPressed_new = Keyboard::isKeyPressed(Keyboard::LControl);
-    if (!spawnEnPressed && spawnEnPressed_new) {
-        enemies.emplace_front(new Enemy(90, texture, { 0,0,13,13 }, rng));
-        enemies.front()->setPosition({ 100.f, 100.f });
-        enemies.front()->setVel({ 150.f,0.f });
-    }
-    spawnEnPressed = spawnEnPressed_new;
-
     player->update(dt, grnd);
 
+    // Update explosions
     for (auto it = explosions.begin(); it != explosions.end(); ++it) {
         (*it)->update(dt, grnd);
         if ((*it)->finishedAnim()) {
@@ -92,11 +100,13 @@ void Game::update(float dt)
             break;
     }
 
+    // Update bullets
+
     // func aux to code below
     auto dec_or_del = [](Tank* t) {
         if (t->getFireCount() == 1) {
             Enemy* e = dynamic_cast<Enemy*>(t);
-            if (e && e->getExploded())
+            if (e && e->getHealth() < 1)
                 delete e;
             else
                 t->decFireCount();
@@ -127,17 +137,22 @@ void Game::update(float dt)
             for (auto ite = enemies.begin(); ite != enemies.end(); ++ite) {
                 if (it->first->getCollisionBox().intersects((*ite)->getCollisionBox())) {
                     it->second->decFireCount();
-                    // Create an explosion
+                    // Bullet explosion
                     explosions.emplace_front(new Explosion(texture, { 64, 128, 16, 16 }, 3));
                     explosions.front()->setPosition((*ite)->getPosition());
-                    // only delete the enemy if don't have bullet (but remove it from enimies)
-                    // if have bullet it will be deleted when the bullet get deleted
-                    if ((*ite)->getFireCount() == 0)
-                        delete* ite;
-                    else
-                        (*ite)->setExploded();
+                    (*ite)->hit();
+                    if ((*ite)->getHealth() < 1) {
+                        // Tank explosion
+                        explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2));
+                        explosions.front()->setPosition((*ite)->getPosition());
+                        // only delete the enemy if don't have bullet (but remove it from enimies)
+                        // if have bullet it will be deleted when the bullet get deleted
+                        if ((*ite)->getFireCount() == 0)
+                            delete* ite;
+                        ite = enemies.erase(ite);
+                    }
+
                     delete it->first;
-                    ite = enemies.erase(ite);
                     it = bullets.erase(it);
                     deleted = true;
                     break; // a bullet can only explode one tank
@@ -161,10 +176,12 @@ void Game::update(float dt)
                 }
             }
         }
-        else { // enimy bullet
+        else { // enemy bullet
             if (it->first->getCollisionBox().intersects(player->getCollisionBox())) {
                 // kill the player
-                player->setPosition(300.f, 400.f);
+                explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2));
+                explosions.front()->setPosition(player->getPosition());
+                player->setPosition(pSpawnPos);
 
                 dec_or_del(it->second);
                 delete it->first;
@@ -176,6 +193,7 @@ void Game::update(float dt)
             break;
     }
 
+    // Update enemies
     for (auto e : enemies) {
         e->update(dt, grnd);
         if (e->tryFire()) {
@@ -184,6 +202,9 @@ void Game::update(float dt)
         }
     }
 
+    ctrlNumEnemies();
+
+    // update ground
     grnd.update(dt);
 }
 
@@ -202,13 +223,41 @@ void Game::draw()
         area_grnd.draw(*e);
 
     // player collision box
-    auto p = player->getCollisionBox();
-    RectangleShape r({ p.width, p.height });
-    r.setOutlineColor(Color::Magenta);
-    r.setOutlineThickness(-1);
-    r.setFillColor(Color::Transparent);
-    r.setPosition({p.left, p.top});
-    area_grnd.draw(r);
+    //auto p = player->getCollisionBox();
+    //RectangleShape r({ p.width, p.height });
+    //r.setOutlineColor(Color::Magenta);
+    //r.setOutlineThickness(-1);
+    //r.setFillColor(Color::Transparent);
+    //r.setPosition({p.left, p.top});
+    //area_grnd.draw(r);
 
     mWindow.display();
+}
+
+void Game::ctrlNumEnemies()
+{
+    // check if can spawn an enemy
+    if (spawnedEnemies < totalEnemies && int(enemies.size()) < maxEnemies) {
+        if (enemySpawnDist(rng) == 0) {
+            // calc spawn position
+            float halfgrnd = (grnd.getBlockSize() * grnd.getNCols()) / 2;
+            float x = 16.f + enemyPosDist(rng) * (halfgrnd-16.f);
+            // calc type
+            int type = enemyTypeDist(rng);
+            float speed = 90;
+            int health = 1;
+            if (type == 1)
+                speed = 125.f;
+            if (type == 3) {
+                speed = 70.f;
+                health = 4;
+            }
+            // spawn
+            enemies.emplace_front(new Enemy(90, texture, { 0, 64 + 16*type,13,16 }, rng, health));
+            enemies.front()->setPosition({x, 16.f});
+
+            enemies.front()->setVel({ 0.f,speed });
+            spawnedEnemies++;
+        }
+    }
 }

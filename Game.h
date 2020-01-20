@@ -31,6 +31,15 @@ private:
 	RectangleShape edges;
 	mt19937 rng;
 	random_device rd;
+	const int totalEnemies = 20;
+	const int maxEnemies = 4;
+	int spawnedEnemies = 0;
+	uniform_int_distribution<int> enemyPosDist;
+	uniform_int_distribution<int> enemySpawnDist;
+	uniform_int_distribution<int> enemyTypeDist;
+	Vec2 pSpawnPos;
+private:
+	void ctrlNumEnemies();
 public:
 	Game(RenderWindow& mWindow);
 	void update(float dt);

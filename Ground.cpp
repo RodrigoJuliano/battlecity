@@ -1,4 +1,5 @@
 #include "Ground.h"
+#include <fstream>
 
 int Ground::GetBlock(const Vec2& pos) const
 {
@@ -75,11 +76,6 @@ Ground::Ground(Texture& tex)
 		}
 }
 
-void Ground::update(float dt)
-{
-	Animable::update(dt);
-}
-
 void Ground::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	// apply the transform
@@ -114,4 +110,50 @@ void Ground::onFrameChanged()
 				quad[3].texCoords = Vec2(64 + tu * Gfx::TextureResolution, (tv + 1) * Gfx::TextureResolution);
 			}
 		}
+}
+
+bool Ground::saveToFile(std::string file)
+{
+	std::ofstream f(file);
+	if (f.fail()) {
+		f.close();
+		return false;
+	}
+
+	for (unsigned int i = 0; i < cols; ++i) {
+		for (unsigned int j = 0; j < rows; ++j) {
+			f << mGround[i][j] << " ";
+		}
+		f << "\n";
+	}
+	f.close();
+	return true;
+}
+
+bool Ground::loadFromFile(std::string file)
+{
+	std::ifstream f(file);
+	if (f.fail()) {
+		f.close();
+		return false;
+	}
+	int b;
+	for (unsigned int i = 0; i < cols; ++i) {
+		for (unsigned int j = 0; j < rows; ++j) {
+			f >> b;
+			setBlock(i, j, b);
+		}
+	}
+	f.close();
+	return true;
+}
+
+int Ground::getBlockSize()
+{
+	return blockSize;
+}
+
+int Ground::getNCols()
+{
+	return cols;
 }

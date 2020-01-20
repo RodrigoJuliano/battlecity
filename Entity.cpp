@@ -1,12 +1,13 @@
 #include "Entity.h"
 #include <SFML/Graphics/Rect.hpp>
 
-Entity::Entity(Texture& tex, IntRect firstframe, int nFrames)
+Entity::Entity(Texture& tex, IntRect firstframe, int nFrames, float collisionsize)
 	:
 	Animable(nFrames, 0.1f),
 	id(0),
 	texture(tex),
-	fframe(firstframe)
+	fframe(firstframe),
+	collisionsize(collisionsize)
 {
 	shape[0].position = Vec2( 0.f, 0.f );
 	shape[1].position = Vec2( fframe.width, 0.f );
@@ -59,13 +60,8 @@ void Entity::update(float dt, Ground& grnd)
 
 FloatRect Entity::getCollisionBox() const
 {
-	auto r = getGlobalBounds();
-	// reduce the box a little bit
-	//r.top += 3;
-	//r.left += 3;
-	//r.height -= 6;
-	//r.width -= 6;
-	return r;
+	return FloatRect(getPosition() - Vec2(collisionsize/2, collisionsize/2),
+		Vec2(collisionsize, collisionsize));
 }
 
 Vec2 Entity::GetDirection() const

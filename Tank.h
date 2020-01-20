@@ -7,10 +7,11 @@
 class Tank : public Entity
 {
 private:
-	int maxFire = 1;
+	const int maxFire = 1;
 	int fireCounter = 0;
+	int health;
 public:
-	Tank(int id, Texture& tex, IntRect firstframe);
+	Tank(int id, Texture& tex, IntRect firstframe, int health = 1);
 	virtual void update(float dt, Ground& grnd);
 	virtual bool tryFire();
 	void decFireCount();
@@ -19,5 +20,7 @@ public:
 	virtual void onCollidDown() {};
 	virtual void onCollidLeft() {};
 	virtual void onCollidRigth() {};
+	void hit();
+	int getHealth();
 };
 

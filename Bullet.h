@@ -12,5 +12,4 @@ public:
 	bool CollidesWith(int block) const;
 	void update(float dt, Ground& grnd);
 	bool Collided() const;
-	FloatRect getCollisionBox() const;
 };

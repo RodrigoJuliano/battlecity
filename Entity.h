@@ -16,8 +16,9 @@ protected:
 private:
 	Texture& texture;
 	VertexArray shape = VertexArray(Quads, 4);
+	float collisionsize;
 public:
-	Entity(Texture& tex, IntRect firstframe, int nFrames);
+	Entity(Texture& tex, IntRect firstframe, int nFrames, float collisionsize);
 	Vec2 GetVel() const;
 	void setVel(Vec2 vel);
 	Vec2 GetDirection() const;

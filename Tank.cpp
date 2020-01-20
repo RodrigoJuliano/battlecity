@@ -1,8 +1,9 @@
 #include "Tank.h"
 
-Tank::Tank(int id, Texture& tex, IntRect firstframe)
+Tank::Tank(int id, Texture& tex, IntRect firstframe,int health)
 	:
-	Entity(tex, firstframe, 2)
+	Entity(tex, firstframe, 2, 32.f),
+	health(health)
 {
 }
 
@@ -30,7 +31,7 @@ void Tank::update(float dt, Ground& grnd)
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block on the right
 		// basicaly get the relative ground position, sum 1 and convert back to screen position
-		setPosition({ int(floor(r.left / grnd.blockSize) + 1) * grnd.blockSize + ceil(r.width / 2), p.y });
+		setPosition({ int(floor(r.left / grnd.blockSize) + 1) * grnd.blockSize + (r.width / 2), p.y });
 		onCollidLeft();
 	}
 	// right
@@ -40,7 +41,7 @@ void Tank::update(float dt, Ground& grnd)
 	b3 = grnd.GetBlock({ r.left + r.width, r.top + r.height });
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block on the left
-		setPosition({ int((r.left + r.width)/ grnd.blockSize) * grnd.blockSize - ceil(r.width / 2), p.y });
+		setPosition({ int((r.left + r.width)/ grnd.blockSize) * grnd.blockSize - (r.width / 2) -0.1f, p.y });
 		onCollidRigth();
 	}
 
@@ -59,7 +60,7 @@ void Tank::update(float dt, Ground& grnd)
 
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block below
-		setPosition({ p.x, int(floor(r.top / grnd.blockSize) + 1) * grnd.blockSize + ceil(r.height / 2) });
+		setPosition({ p.x, int(floor(r.top / grnd.blockSize) + 1) * grnd.blockSize + (r.height / 2) });
 		onCollidUp();
 	}
 	// down
@@ -69,7 +70,7 @@ void Tank::update(float dt, Ground& grnd)
 	b3 = grnd.GetBlock({ r.left + r.width / 2, r.top + r.height });
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block above
-		setPosition({ p.x, int((r.top + r.height ) / grnd.blockSize) * grnd.blockSize - ceil(r.height / 2) });
+		setPosition({ p.x, int((r.top + r.height ) / grnd.blockSize) * grnd.blockSize - (r.height / 2) -0.1f});
 		onCollidDown();
 	}
 }
@@ -91,4 +92,14 @@ void Tank::decFireCount()
 int Tank::getFireCount()
 {
 	return fireCounter;
+}
+
+void Tank::hit()
+{
+	health--;
+}
+
+int Tank::getHealth()
+{
+	return health;
 }
