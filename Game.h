@@ -8,6 +8,7 @@
 #include "Enemy.h"
 #include <list>
 #include <random>
+#include "SoundSystem.h"
 
 using namespace std;
 using namespace sf;
@@ -38,6 +39,8 @@ private:
 	uniform_int_distribution<int> enemySpawnDist;
 	uniform_int_distribution<int> enemyTypeDist;
 	Vec2 pSpawnPos;
+	SoundSystem soundSys;
+	bool pmovesound = false;
 private:
 	void ctrlNumEnemies();
 public:

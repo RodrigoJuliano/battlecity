@@ -28,6 +28,10 @@ Game::Game(RenderWindow& mWindow)
     edges.setFillColor(Color::Transparent);
     edges.setOutlineColor(Color(99, 99, 99));
     edges.setOutlineThickness(-Gfx::EdgeSize);
+
+    // Load sounds
+    soundSys.loadSounds("resources\\sounds");
+    soundSys.play(SFX::tankIdle, true);
 }
 
 void Game::update(float dt)
@@ -60,6 +64,7 @@ void Game::update(float dt)
     spawnEnPressed = spawnEnPressed_new;
 
     // Player move
+    bool pmovesound_new = true;
     if (Keyboard::isKeyPressed(Keyboard::W)) {
         player->setVel({0.0f, -100.0f});
     }
@@ -74,13 +79,29 @@ void Game::update(float dt)
     }
     else {
         player->setVel({ 0.0f, 0.0f });
+        pmovesound_new = false;
     }
+
+    // toggles between move and idle sounds
+    if (pmovesound_new) {
+        if (!pmovesound) {
+            soundSys.pause(SFX::tankIdle);
+            soundSys.play(SFX::tankMove, true);
+        }
+    }
+    else if (pmovesound) {
+        soundSys.pause(SFX::tankMove);
+        soundSys.play(SFX::tankIdle, true);
+    }
+    pmovesound = pmovesound_new;
+
     // Player fire
     bool firePressed_new = Keyboard::isKeyPressed(Keyboard::RShift);
     if (!firePressed && firePressed_new) {
         if (player->tryFire()) {
             bullets.emplace_front(new Bullet(texture, { 131,102, 3,4 }, player->GetDirection() * 200.f), player);
             bullets.front().first->setPosition(player->getPosition());
+            soundSys.play(SFX::shoot);
         }
     }
     firePressed = firePressed_new;
@@ -124,6 +145,8 @@ void Game::update(float dt)
             // Create an explosion
             explosions.emplace_front(new Explosion(texture, { 64, 128, 16, 16 }, 3));
             explosions.front()->setPosition(it->first->getPosition());
+            if (it->second == player)
+                soundSys.play(SFX::bulletHit);
             // When an enimy bullet is deleted need to check if the
             // bullet owner was already exploded
             dec_or_del(it->second);
@@ -141,6 +164,7 @@ void Game::update(float dt)
                     explosions.emplace_front(new Explosion(texture, { 64, 128, 16, 16 }, 3));
                     explosions.front()->setPosition((*ite)->getPosition());
                     (*ite)->hit();
+                    soundSys.play(SFX::bulletHit);
                     if ((*ite)->getHealth() < 1) {
                         // Tank explosion
                         explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2));
@@ -150,6 +174,7 @@ void Game::update(float dt)
                         if ((*ite)->getFireCount() == 0)
                             delete* ite;
                         ite = enemies.erase(ite);
+                        soundSys.play(SFX::tankExplode);
                     }
 
                     delete it->first;
@@ -186,6 +211,7 @@ void Game::update(float dt)
                 dec_or_del(it->second);
                 delete it->first;
                 it = bullets.erase(it);
+                soundSys.play(SFX::tankExplode);
             }
         }
 
