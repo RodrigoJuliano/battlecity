@@ -1,9 +1,10 @@
 #include "Tank.h"
 
-Tank::Tank(Texture& tex, IntRect firstframe,int health)
+Tank::Tank(Texture& tex, IntRect firstframe, int health, float bulletSpeed)
 	:
 	Entity(tex, firstframe, 2, 32.f),
-	health(health)
+	health(health),
+	bulletSpeed(bulletSpeed)
 {
 }
 
@@ -107,4 +108,19 @@ int Tank::getHealth()
 void Tank::kill()
 {
 	health = 0;
+}
+
+float Tank::getBulletSpeed()
+{
+	return bulletSpeed;
+}
+
+void Tank::setBulletSpeed(float speed)
+{
+	bulletSpeed = speed;
+}
+
+void Tank::setMaxFire(int mfire)
+{
+	maxFire = mfire;
 }

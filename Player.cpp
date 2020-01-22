@@ -2,7 +2,7 @@
 
 Player::Player(Texture& tex, IntRect firstframe, IntRect shieldfframe)
 	:
-	Tank(tex, firstframe),
+	Tank(tex, firstframe, 1, 330.f),
 	shield(tex, shieldfframe, 2, 0.f, 0.01f)
 {
 }
@@ -35,9 +35,11 @@ void Player::addStar()
 	{
 	case 1:
 		setTextureRect({0, 16, 13, 16});
+		setBulletSpeed(500.f);
 		break;
 	case 2:
 		setTextureRect({ 0, 32, 13, 15 });
+		setMaxFire(2);
 		break;
 	case 3:
 		setTextureRect({ 0, 48, 14, 15 });
@@ -56,6 +58,8 @@ void Player::resetStars()
 	stars = 0;
 	setTextureRect({ 0, 0, 13, 13 });
 	constructShape();
+	setBulletSpeed(330.f);
+	setMaxFire(1);
 }
 
 void Player::draw(sf::RenderTarget& target, sf::RenderStates states) const

@@ -58,5 +58,6 @@ public:
 	Game(RenderWindow& mWindow);
 	void update(float dt);
 	void draw();
+	~Game();
 };
 

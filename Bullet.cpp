@@ -1,8 +1,9 @@
 #include "Bullet.h"
 
-Bullet::Bullet(Texture& tex, IntRect texRect, Vec2 velocity)
+Bullet::Bullet(Texture& tex, IntRect texRect, Vec2 velocity, bool canBreakSteel)
 	:
-	Entity(tex, texRect, 1, 14.f)
+	Entity(tex, texRect, 1, 14.f),
+	canBreakSteel(canBreakSteel)
 {
 	setVel(velocity);
 }
@@ -35,22 +36,22 @@ void Bullet::update(float dt, Ground& grnd)
 	int b4 = grnd.GetBlock(p4);
 
 	if (CollidesWith(b1)) {
-		if (b1 == 0)
+		if (b1 == 0 || (b1 == 1 && canBreakSteel))
 			grnd.setBlock(p1, -1);
 		collided = true;
 	}
 	if (CollidesWith(b2)) {
-		if (b2 == 0)
+		if (b2 == 0 || (b2 == 1 && canBreakSteel))
 			grnd.setBlock(p2, -1);
 		collided = true;
 	}
 	if (CollidesWith(b3)) {
-		if (b3 == 0)
+		if (b3 == 0 || (b3 == 1 && canBreakSteel))
 			grnd.setBlock(p3, -1);
 		collided = true;
 	}
 	if (CollidesWith(b4)) {
-		if (b4 == 0)
+		if (b4 == 0 || (b4 == 1 && canBreakSteel))
 			grnd.setBlock(p4, -1);
 		collided = true;
 	}

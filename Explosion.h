@@ -8,7 +8,7 @@ class Explosion : public cSprite
 private:
 	bool finished = false;
 public:
-	Explosion(Texture& tex, IntRect firstframe, int nFrames, float frameTime = 0.1f)
+	Explosion(Texture& tex, IntRect firstframe, int nFrames, float frameTime = 0.05f)
 		:
 		cSprite(tex, firstframe, nFrames, 0.f, frameTime)
 	{

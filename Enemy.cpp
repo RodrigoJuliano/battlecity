@@ -1,8 +1,8 @@
 #include "Enemy.h"
 
-Enemy::Enemy(Texture& tex, IntRect firstframe, mt19937& rng, int health)
+Enemy::Enemy(Texture& tex, IntRect firstframe, mt19937& rng, int health, float bulletSpeed)
 	:
-	Tank(tex, firstframe, health),
+	Tank(tex, firstframe, health, bulletSpeed),
 	rng(rng),
 	onColDirDis(0,30),
 	anyTimeDirDis(0.f, 1.f),

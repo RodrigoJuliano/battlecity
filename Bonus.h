@@ -13,6 +13,7 @@ public:
 		grenade,
 		tank
 	};
+private:
 	Type type;
 	float time = 30.f;
 public:

@@ -103,14 +103,13 @@ void Game::update(float dt)
     bool firePressed_new = Keyboard::isKeyPressed(Keyboard::RShift);
     if (!firePressed && firePressed_new) {
         if (player->tryFire()) {
-            bullets.emplace_front(new Bullet(texture, { 131,102, 3,4 }, player->GetDirection() * 200.f), player);
+            bullets.emplace_front(new Bullet(texture, { 131,102, 3,4 },
+                player->GetDirection() * player->getBulletSpeed(), player->getNumStars() > 2), player);
             bullets.front().first->setPosition(player->getPosition());
             soundSys.play(SFX::shoot);
         }
     }
     firePressed = firePressed_new;
-
-    player->update(dt, grnd);
 
     // Update explosions
     for (auto it = explosions.begin(); it != explosions.end(); ++it) {
@@ -129,12 +128,11 @@ void Game::update(float dt)
 
     // func aux to code below
     auto dec_or_del = [](Tank* t) {
+        t->decFireCount();
         if (t->getFireCount() == 1) {
             Enemy* e = dynamic_cast<Enemy*>(t);
             if (e && e->getHealth() < 1)
                 delete e;
-            else
-                t->decFireCount();
         }
     };
 
@@ -168,7 +166,6 @@ void Game::update(float dt)
                     explosions.emplace_front(new Explosion(texture, { 64, 128, 16, 16 }, 3));
                     explosions.front()->setPosition((*ite)->getPosition());
                     (*ite)->hit();
-                    soundSys.play(SFX::bulletHit);
                     if ((*ite)->getHealth() < 1) {
                         // Tank explosion
                         explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2));
@@ -195,6 +192,8 @@ void Game::update(float dt)
                         ite = enemies.erase(ite);
                         soundSys.play(SFX::tankExplode);
                     }
+                    else
+                        soundSys.play(SFX::bulletHitTank);
 
                     delete it->first;
                     it = bullets.erase(it);
@@ -222,17 +221,19 @@ void Game::update(float dt)
         }
         else { // enemy bullet
             if (it->first->getCollisionBox().intersects(player->getCollisionBox())) {
-                // kill the player
-                explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2));
-                explosions.front()->setPosition(player->getPosition());
-                player->setPosition(pSpawnPos);
-                player->addShield(4.f);
-                player->resetStars();
+                if (!player->isShielded()) {
+                    // kill the player
+                    explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2));
+                    explosions.front()->setPosition(player->getPosition());
+                    player->setPosition(pSpawnPos);
+                    player->addShield(4.f);
+                    player->resetStars();
 
-                dec_or_del(it->second);
+                    dec_or_del(it->second);
+                    soundSys.play(SFX::tankExplode);
+                }
                 delete it->first;
                 it = bullets.erase(it);
-                soundSys.play(SFX::tankExplode);
             }
         }
 
@@ -245,7 +246,7 @@ void Game::update(float dt)
         for (auto e : enemies) {
             e->update(dt, grnd);
             if (e->tryFire()) {
-                bullets.emplace_front(new Bullet(texture, { 131,102, 3,4 }, e->GetDirection() * 200.f), e);
+                bullets.emplace_front(new Bullet(texture, { 131,102, 3,4 }, e->GetDirection() * e->getBulletSpeed()), e);
                 bullets.front().first->setPosition(e->getPosition());
             }
         }
@@ -318,6 +319,8 @@ void Game::update(float dt)
             soundSys.play(sound);
         }
     }
+
+    player->update(dt, grnd);
 }
 
 void Game::draw()
@@ -360,14 +363,19 @@ void Game::ctrlNumEnemies()
             int type = enemyTypeDist(rng);
             float speed = 70.f;
             int health = 1;
-            if (type == 0)
+            float bulletspeed = 330.f;
+            if (type == 0) {
                 speed = 60.f;
-            else if (type == 1)
+                bulletspeed = 250.f;
+            }
+            else if (type == 1) {
                 speed = 125.f;
+                bulletspeed = 500.f;
+            }
             else if (type == 3)
                 health = 4;
             // spawn
-            enemies.emplace_front(new Enemy(texture, { 0, 64 + 16*type,13,16 }, rng, health));
+            enemies.emplace_front(new Enemy(texture, { 0, 64 + 16*type,13,16 }, rng, health, bulletspeed));
             enemies.front()->setPosition({x, 16.f});
 
             enemies.front()->setVel({ 0.f,speed });
@@ -393,4 +401,17 @@ void Game::setblocksshovelbonus(int block)
     grnd.setBlock(14, 23, block);
     grnd.setBlock(14, 24, block);
     grnd.setBlock(14, 25, block);
+}
+
+Game::~Game()
+{
+    for (auto e : bullets)
+        delete e.first;
+    for (auto e : enemies)
+        delete e;
+    for (auto e : explosions)
+        delete e;
+    if (bonus)
+        delete bonus;
+    delete player;
 }

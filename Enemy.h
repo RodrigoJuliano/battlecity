@@ -12,7 +12,7 @@ private:
 	uniform_int_distribution<int> fireDis;
 	bool bonusMark = false;
 public:
-	Enemy(Texture& tex, IntRect firstframe, mt19937& rng, int health);
+	Enemy(Texture& tex, IntRect firstframe, mt19937& rng, int health, float bulletSpeed);
 	virtual void update(float dt, Ground& grnd);
 	virtual bool tryFire();
 	virtual void onCollidUp();
