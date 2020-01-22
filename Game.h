@@ -9,6 +9,8 @@
 #include <list>
 #include <random>
 #include "SoundSystem.h"
+#include "Bonus.h"
+#include "Player.h"
 
 using namespace std;
 using namespace sf;
@@ -20,7 +22,7 @@ private:
 	Ground grnd;
 	Texture texture;
 	int id = 0;
-	Tank* player;
+	Player* player;
 	bool toggleBlockPressed = false;
 	bool firePressed = false;
 	bool spawnEnPressed = false;
@@ -37,12 +39,21 @@ private:
 	int spawnedEnemies = 0;
 	uniform_int_distribution<int> enemyPosDist;
 	uniform_int_distribution<int> enemySpawnDist;
-	uniform_int_distribution<int> enemyTypeDist;
+	discrete_distribution<int> enemyTypeDist;
 	Vec2 pSpawnPos;
 	SoundSystem soundSys;
 	bool pmovesound = false;
+	Bonus* bonus = nullptr;
+	uniform_int_distribution<int> enemyBonusMarkDist;
+	uniform_int_distribution<int> bonusTypeDist;
+	normal_distribution<float> bonusPosDist;
+	bool timerBonusOn = false;
+	float timerBonusTime = 0.f;
+	bool shovelBonusOn = false;
+	float shovelBonusTime = 0.f;
 private:
 	void ctrlNumEnemies();
+	void setblocksshovelbonus(int block);
 public:
 	Game(RenderWindow& mWindow);
 	void update(float dt);

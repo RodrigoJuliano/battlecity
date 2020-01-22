@@ -3,18 +3,18 @@
 class Animable
 {
 protected:
-	const int nFrames;
+	int nFrames;
 	int curFrame = 0;
-	const float frameTime;
+	float frameTime;
 	float curframetime = 0.0f;
 public:
-	inline Animable(int nFrames, float frameTime)
-	:
+	Animable(int nFrames, float frameTime)
+		:
 		nFrames(nFrames),
 		frameTime(frameTime)
 	{
 	}
-	inline void update(float dt) {
+	void update(float dt) {
 		if (nFrames > 1) {
 			if (curframetime > frameTime) {
 				curframetime = 0.0f;

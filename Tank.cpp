@@ -1,6 +1,6 @@
 #include "Tank.h"
 
-Tank::Tank(int id, Texture& tex, IntRect firstframe,int health)
+Tank::Tank(Texture& tex, IntRect firstframe,int health)
 	:
 	Entity(tex, firstframe, 2, 32.f),
 	health(health)
@@ -102,4 +102,9 @@ void Tank::hit()
 int Tank::getHealth()
 {
 	return health;
+}
+
+void Tank::kill()
+{
+	health = 0;
 }

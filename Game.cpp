@@ -10,7 +10,10 @@ Game::Game(RenderWindow& mWindow)
     rng(rd()),
     enemyPosDist(0, 2),
     enemySpawnDist(0, 100),
-    enemyTypeDist(0, 3)
+    enemyTypeDist{ 4, 2, 3, 1},
+    enemyBonusMarkDist(0, 10),
+    bonusTypeDist(0, 5),
+    bonusPosDist(grnd.getBlockSize()*grnd.getNCols()/2.f,100.0f)
 {
     texture.loadFromFile("resources\\textures.png");
 
@@ -19,8 +22,9 @@ Game::Game(RenderWindow& mWindow)
     int bs = grnd.getBlockSize();
     pSpawnPos = Vec2(bs * 9.f, bs * 25.f);
 
-    player = new Tank(0, texture, { 0,0,13,13 });
+    player = new Player(texture, { 0,0,13,13 }, {64,144, 16,16});
     player->setPosition(pSpawnPos);
+    player->addShield(4.f);
 
     // screen edges
     edges.setSize({ Gfx::ScreenWidth, Gfx::ScreenHeight });
@@ -110,7 +114,7 @@ void Game::update(float dt)
 
     // Update explosions
     for (auto it = explosions.begin(); it != explosions.end(); ++it) {
-        (*it)->update(dt, grnd);
+        (*it)->update(dt);
         if ((*it)->finishedAnim()) {
             delete *it;
             it = explosions.erase(it);
@@ -169,6 +173,21 @@ void Game::update(float dt)
                         // Tank explosion
                         explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2));
                         explosions.front()->setPosition((*ite)->getPosition());
+                        // check for bonus
+                        if ((*ite)->hasBonusMark()) {
+                            int type = bonusTypeDist(rng);
+                            if (bonus) // only one bonus is allowed
+                                delete bonus;
+                            bonus = new Bonus(texture, {96, 15 * type, 16,15}, Bonus::Type(type));
+                            int grnsz = grnd.getBlockSize() * grnd.getNCols();
+                            float x = bonusPosDist(rng);
+                            float y = bonusPosDist(rng);
+                            // clamp the position
+                            x = min(max(x, 16.f), grnsz-16.f);
+                            y = min(max(y, 16.f), grnsz-16.f);
+                            bonus->setPosition({ x, y });
+                            soundSys.play(SFX::bonusSpawn);
+                        }
                         // only delete the enemy if don't have bullet (but remove it from enimies)
                         // if have bullet it will be deleted when the bullet get deleted
                         if ((*ite)->getFireCount() == 0)
@@ -207,6 +226,8 @@ void Game::update(float dt)
                 explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2));
                 explosions.front()->setPosition(player->getPosition());
                 player->setPosition(pSpawnPos);
+                player->addShield(4.f);
+                player->resetStars();
 
                 dec_or_del(it->second);
                 delete it->first;
@@ -220,11 +241,13 @@ void Game::update(float dt)
     }
 
     // Update enemies
-    for (auto e : enemies) {
-        e->update(dt, grnd);
-        if (e->tryFire()) {
-            bullets.emplace_front(new Bullet(texture, { 131,102, 3,4 }, e->GetDirection() * 200.f), e);
-            bullets.front().first->setPosition(e->getPosition());
+    if (!timerBonusOn) {
+        for (auto e : enemies) {
+            e->update(dt, grnd);
+            if (e->tryFire()) {
+                bullets.emplace_front(new Bullet(texture, { 131,102, 3,4 }, e->GetDirection() * 200.f), e);
+                bullets.front().first->setPosition(e->getPosition());
+            }
         }
     }
 
@@ -232,6 +255,69 @@ void Game::update(float dt)
 
     // update ground
     grnd.update(dt);
+
+    // Timer bonus
+    if (timerBonusOn) {
+        timerBonusTime -= dt;
+        if (timerBonusTime < 0.f)
+            timerBonusOn = false;
+    }
+
+    // Shovel bonus
+    if (shovelBonusOn) {
+        shovelBonusTime -= dt;
+        if (shovelBonusTime < 0.f) {
+            shovelBonusOn = false;
+            setblocksshovelbonus(0);
+        }
+    }
+
+    if (bonus) {
+        bonus->update(dt);
+        if (bonus->getTime() < 0.f) {
+            delete bonus;
+            bonus = nullptr;
+        }
+        else if (player->getCollisionBox().intersects(bonus->getCollisionBox())) {
+            SFX sound = SFX::getBonus;
+            switch (bonus->getType())
+            {
+            case Bonus::Type::helmet:
+                player->addShield(10.f);
+                break;
+            case Bonus::Type::timer:
+                timerBonusOn = true;
+                timerBonusTime = 15.f;
+                break;
+            case Bonus::Type::shovel:
+                shovelBonusOn = true;
+                shovelBonusTime = 15.f;
+                setblocksshovelbonus(1);
+                break;
+            case Bonus::Type::star:
+                player->addStar();
+                break;
+            case Bonus::Type::grenade:
+                for (auto e : enemies) {
+                    e->kill();
+                    explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2));
+                    explosions.front()->setPosition(e->getPosition());
+                    if (e->getFireCount() == 0)
+                        delete e;
+                }
+                enemies.clear();
+                soundSys.play(SFX::tankExplode);
+                break;
+            case Bonus::Type::tank:
+                player->addLife();
+                sound = SFX::getLife;
+                break;
+            }
+            delete bonus;
+            bonus = nullptr;
+            soundSys.play(sound);
+        }
+    }
 }
 
 void Game::draw()
@@ -247,6 +333,8 @@ void Game::draw()
         area_grnd.draw(*(e.first));
     for (auto e : explosions)
         area_grnd.draw(*e);
+    if (bonus)
+        area_grnd.draw(*bonus);
 
     // player collision box
     //auto p = player->getCollisionBox();
@@ -266,24 +354,43 @@ void Game::ctrlNumEnemies()
     if (spawnedEnemies < totalEnemies && int(enemies.size()) < maxEnemies) {
         if (enemySpawnDist(rng) == 0) {
             // calc spawn position
-            float halfgrnd = (grnd.getBlockSize() * grnd.getNCols()) / 2;
+            float halfgrnd = (grnd.getBlockSize() * grnd.getNCols()) / 2.f;
             float x = 16.f + enemyPosDist(rng) * (halfgrnd-16.f);
             // calc type
             int type = enemyTypeDist(rng);
-            float speed = 90;
+            float speed = 70.f;
             int health = 1;
-            if (type == 1)
+            if (type == 0)
+                speed = 60.f;
+            else if (type == 1)
                 speed = 125.f;
-            if (type == 3) {
-                speed = 70.f;
+            else if (type == 3)
                 health = 4;
-            }
             // spawn
-            enemies.emplace_front(new Enemy(90, texture, { 0, 64 + 16*type,13,16 }, rng, health));
+            enemies.emplace_front(new Enemy(texture, { 0, 64 + 16*type,13,16 }, rng, health));
             enemies.front()->setPosition({x, 16.f});
 
             enemies.front()->setVel({ 0.f,speed });
             spawnedEnemies++;
+
+            if (enemyBonusMarkDist(rng) > 9) {
+                enemies.front()->setBonusMark();
+            }
         }
     }
+}
+
+void Game::setblocksshovelbonus(int block)
+{
+    // left
+    grnd.setBlock(11, 23, block);
+    grnd.setBlock(11, 24, block);
+    grnd.setBlock(11, 25, block);
+    // top
+    grnd.setBlock(12, 23, block);
+    grnd.setBlock(13, 23, block);
+    // right
+    grnd.setBlock(14, 23, block);
+    grnd.setBlock(14, 24, block);
+    grnd.setBlock(14, 25, block);
 }

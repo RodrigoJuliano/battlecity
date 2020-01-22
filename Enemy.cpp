@@ -1,8 +1,8 @@
 #include "Enemy.h"
 
-Enemy::Enemy(int id, Texture& tex, IntRect firstframe, mt19937& rng, int health)
+Enemy::Enemy(Texture& tex, IntRect firstframe, mt19937& rng, int health)
 	:
-	Tank(id, tex, firstframe, health),
+	Tank(tex, firstframe, health),
 	rng(rng),
 	onColDirDis(0,30),
 	anyTimeDirDis(0.f, 1.f),
@@ -121,4 +121,15 @@ void Enemy::onCollidRigth()
 	}
 
 	setVel(vel);
+}
+
+void Enemy::setBonusMark()
+{
+	bonusMark = true;
+	nFrames = 3; // add the red frame
+}
+
+bool Enemy::hasBonusMark() const
+{
+	return bonusMark;
 }

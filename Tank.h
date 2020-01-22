@@ -11,7 +11,7 @@ private:
 	int fireCounter = 0;
 	int health;
 public:
-	Tank(int id, Texture& tex, IntRect firstframe, int health = 1);
+	Tank(Texture& tex, IntRect firstframe, int health = 1);
 	virtual void update(float dt, Ground& grnd);
 	virtual bool tryFire();
 	void decFireCount();
@@ -22,5 +22,6 @@ public:
 	virtual void onCollidRigth() {};
 	void hit();
 	int getHealth();
+	void kill();
 };
 

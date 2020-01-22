@@ -1,26 +1,11 @@
 #include "Entity.h"
 #include <SFML/Graphics/Rect.hpp>
 
-Entity::Entity(Texture& tex, IntRect firstframe, int nFrames, float collisionsize)
+Entity::Entity(Texture& tex, IntRect firstframe, int nFrames,
+	float collisionsize, float frameTime)
 	:
-	Animable(nFrames, 0.1f),
-	id(0),
-	texture(tex),
-	fframe(firstframe),
-	collisionsize(collisionsize)
+	cSprite(tex, firstframe, nFrames, collisionsize, frameTime)
 {
-	shape[0].position = Vec2( 0.f, 0.f );
-	shape[1].position = Vec2( fframe.width, 0.f );
-	shape[2].position = Vec2( fframe.width, fframe.height );
-	shape[3].position = Vec2( 0.f, fframe.height );
-
-	shape[0].texCoords = Vec2(fframe.left , fframe.top);
-	shape[1].texCoords = Vec2(fframe.left + fframe.width , fframe.top);
-	shape[2].texCoords = Vec2(fframe.left + fframe.width, fframe.top + fframe.height);
-	shape[3].texCoords = Vec2(fframe.left , fframe.top + fframe.height);
-
-	setOrigin({ fframe.width * 0.5f, fframe.height * 0.5f });
-	setScale(Gfx::TextureScaleMult, Gfx::TextureScaleMult);
 }
 
 Vec2 Entity::GetVel() const
@@ -58,12 +43,6 @@ void Entity::update(float dt, Ground& grnd)
 	Animable::update(dt);
 }
 
-FloatRect Entity::getCollisionBox() const
-{
-	return FloatRect(getPosition() - Vec2(collisionsize/2, collisionsize/2),
-		Vec2(collisionsize, collisionsize));
-}
-
 Vec2 Entity::GetDirection() const
 {
 	float r = getRotation();
@@ -76,35 +55,3 @@ Vec2 Entity::GetDirection() const
 	//if(r == 270.f)
 		return { -1.f,0.f };
 }
-
-FloatRect Entity::getGlobalBounds() const
-{
-	FloatRect r(shape[0].position, Vec2( fframe.width, fframe.height ));
-	
-	auto t = getTransform();
-
-	auto tr = t.transformRect(r);
-
-	return tr;
-}
-
-Texture& Entity::getTexture() const
-{
-	return texture;
-}
-
-void Entity::draw(sf::RenderTarget& target, sf::RenderStates states) const
-{
-	states.transform *= getTransform();
-	states.texture = &texture;
-	target.draw(shape, states);
-}
-
-void Entity::onFrameChanged()
-{
-	shape[0].texCoords = Vec2(fframe.left + fframe.width * curFrame, fframe.top);
-	shape[1].texCoords = Vec2(fframe.left + fframe.width * (curFrame + 1), fframe.top);
-	shape[2].texCoords = Vec2(fframe.left + fframe.width * (curFrame + 1), fframe.top + fframe.height);
-	shape[3].texCoords = Vec2(fframe.left + fframe.width * curFrame, fframe.top + fframe.height);
-}
-

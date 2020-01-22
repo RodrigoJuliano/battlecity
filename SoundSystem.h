@@ -11,6 +11,9 @@ enum SFX : unsigned int {
 	tankExplode,
 	tankMove,
 	tankIdle,
+	bonusSpawn,
+	getBonus,
+	getLife,
 	nSounds
 };
 
