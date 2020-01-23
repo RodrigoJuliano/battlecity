@@ -56,4 +56,5 @@ FloatRect cSprite::getCollisionBox() const
 void cSprite::setTextureRect(IntRect rect)
 {
 	fframe = rect;
+	constructShape();
 }

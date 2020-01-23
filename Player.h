@@ -15,6 +15,7 @@ public:
 	bool isShielded();
 	void addLife();
 	int getNumLifes();
+	void decNumLifes();
 	void addStar();
 	int getNumStars();
 	void resetStars();

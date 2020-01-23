@@ -123,10 +123,13 @@ void Enemy::onCollidRigth()
 	setVel(vel);
 }
 
-void Enemy::setBonusMark()
+void Enemy::setBonusMark(bool mark)
 {
-	bonusMark = true;
-	nFrames = 3; // add the red frame
+	bonusMark = mark;
+	if (mark)
+		nFrames = 3; // add the red frame
+	else
+		nFrames = 2;
 }
 
 bool Enemy::hasBonusMark() const

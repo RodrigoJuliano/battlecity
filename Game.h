@@ -11,6 +11,7 @@
 #include "SoundSystem.h"
 #include "Bonus.h"
 #include "Player.h"
+#include "Hud.h"
 
 using namespace std;
 using namespace sf;
@@ -30,8 +31,7 @@ private:
 	list<std::pair<Bullet*, Tank*>> bullets;
 	list<Explosion*> explosions;
 	ScreenArea area_grnd;
-	// screen edges
-	RectangleShape edges;
+	ScreenArea area_hud;
 	mt19937 rng;
 	random_device rd;
 	const int totalEnemies = 20;
@@ -51,9 +51,11 @@ private:
 	float timerBonusTime = 0.f;
 	bool shovelBonusOn = false;
 	float shovelBonusTime = 0.f;
+	Hud hud;
 private:
 	void ctrlNumEnemies();
 	void setblocksshovelbonus(int block);
+	void spawnBonus();
 public:
 	Game(RenderWindow& mWindow);
 	void update(float dt);

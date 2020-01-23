@@ -27,5 +27,6 @@ public:
 	float getBulletSpeed();
 	void setBulletSpeed(float speed);
 	void setMaxFire(int mfire);
+	void setHealth(int health);
 };
 

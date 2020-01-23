@@ -5,37 +5,37 @@
 Game::Game(RenderWindow& mWindow)
     :
     mWindow(mWindow),
-    grnd(texture),
+    grnd({ 26,26 }, Gfx::TileSize, texture, Gfx::TextureResolution,
+        { 64, 0 }, 4, 3, 0.3f),
     area_grnd(mWindow, Vec2(Gfx::EdgeSize, Gfx::EdgeSize)),
+    area_hud(mWindow, Vec2(Gfx::ScreenWidth - 60.f, 0.f)),
     rng(rd()),
     enemyPosDist(0, 2),
     enemySpawnDist(0, 100),
     enemyTypeDist{ 4, 2, 3, 1},
     enemyBonusMarkDist(0, 10),
     bonusTypeDist(0, 5),
-    bonusPosDist(grnd.getBlockSize()*grnd.getNCols()/2.f,100.0f)
+    bonusPosDist(grnd.getTileSize()*grnd.getDim().x/2.f,100.0f),
+    hud(texture)
 {
     texture.loadFromFile("resources\\textures.png");
 
     grnd.loadFromFile("resources\\level1.txt");
 
-    int bs = grnd.getBlockSize();
+    int bs = grnd.getTileSize();
     pSpawnPos = Vec2(bs * 9.f, bs * 25.f);
 
     player = new Player(texture, { 0,0,13,13 }, {64,144, 16,16});
     player->setPosition(pSpawnPos);
     player->addShield(4.f);
 
-    // screen edges
-    edges.setSize({ Gfx::ScreenWidth, Gfx::ScreenHeight });
-    edges.setPosition(0.f, 0.f);
-    edges.setFillColor(Color::Transparent);
-    edges.setOutlineColor(Color(99, 99, 99));
-    edges.setOutlineThickness(-Gfx::EdgeSize);
-
     // Load sounds
     soundSys.loadSounds("resources\\sounds");
-    soundSys.play(SFX::tankIdle, true);
+    //soundSys.play(SFX::tankIdle, true);
+    soundSys.play(SFX::startGame);
+
+    hud.setLifes(player->getNumLifes());
+    hud.setLevel(1);
 }
 
 void Game::update(float dt)
@@ -124,6 +124,20 @@ void Game::update(float dt)
             break;
     }
 
+    if (explosions.size() > 0) { // At last 1 explosion
+        auto ex_it = explosions.end();
+        do {
+            ex_it--;
+            Explosion* ex = *ex_it;
+            ex->update(dt);
+            if (ex->finishedAnim()) {
+                delete ex;
+                ex_it = explosions.erase(ex_it);
+            }
+        } while (ex_it != explosions.begin());
+    }
+
+
     // Update bullets
 
     // func aux to code below
@@ -160,40 +174,21 @@ void Game::update(float dt)
 
             // Teste player bullets colliding with enemies
             for (auto ite = enemies.begin(); ite != enemies.end(); ++ite) {
+                Enemy* enem = *ite;
                 if (it->first->getCollisionBox().intersects((*ite)->getCollisionBox())) {
-                    it->second->decFireCount();
-                    // Bullet explosion
-                    explosions.emplace_front(new Explosion(texture, { 64, 128, 16, 16 }, 3));
-                    explosions.front()->setPosition((*ite)->getPosition());
-                    (*ite)->hit();
-                    if ((*ite)->getHealth() < 1) {
-                        // Tank explosion
-                        explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2));
-                        explosions.front()->setPosition((*ite)->getPosition());
-                        // check for bonus
-                        if ((*ite)->hasBonusMark()) {
-                            int type = bonusTypeDist(rng);
-                            if (bonus) // only one bonus is allowed
-                                delete bonus;
-                            bonus = new Bonus(texture, {96, 15 * type, 16,15}, Bonus::Type(type));
-                            int grnsz = grnd.getBlockSize() * grnd.getNCols();
-                            float x = bonusPosDist(rng);
-                            float y = bonusPosDist(rng);
-                            // clamp the position
-                            x = min(max(x, 16.f), grnsz-16.f);
-                            y = min(max(y, 16.f), grnsz-16.f);
-                            bonus->setPosition({ x, y });
-                            soundSys.play(SFX::bonusSpawn);
-                        }
-                        // only delete the enemy if don't have bullet (but remove it from enimies)
-                        // if have bullet it will be deleted when the bullet get deleted
-                        if ((*ite)->getFireCount() == 0)
-                            delete* ite;
-                        ite = enemies.erase(ite);
-                        soundSys.play(SFX::tankExplode);
+                    player->decFireCount();
+                    enem->hit();
+                    // check for bonus
+                    if (enem->hasBonusMark()) {
+                        spawnBonus();
+                        enem->setBonusMark(false);
                     }
-                    else
+                    if (enem->getHealth() > 0) {
+                        // Bullet explosion
+                        explosions.emplace_front(new Explosion(texture, { 64, 128, 16, 16 }, 3));
+                        explosions.front()->setPosition(it->first->getPosition());
                         soundSys.play(SFX::bulletHitTank);
+                    }
 
                     delete it->first;
                     it = bullets.erase(it);
@@ -223,15 +218,9 @@ void Game::update(float dt)
             if (it->first->getCollisionBox().intersects(player->getCollisionBox())) {
                 if (!player->isShielded()) {
                     // kill the player
-                    explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2));
-                    explosions.front()->setPosition(player->getPosition());
-                    player->setPosition(pSpawnPos);
-                    player->addShield(4.f);
-                    player->resetStars();
-
-                    dec_or_del(it->second);
-                    soundSys.play(SFX::tankExplode);
+                    player->kill();
                 }
+                dec_or_del(it->second);
                 delete it->first;
                 it = bullets.erase(it);
             }
@@ -240,19 +229,6 @@ void Game::update(float dt)
         if (it == bullets.end())
             break;
     }
-
-    // Update enemies
-    if (!timerBonusOn) {
-        for (auto e : enemies) {
-            e->update(dt, grnd);
-            if (e->tryFire()) {
-                bullets.emplace_front(new Bullet(texture, { 131,102, 3,4 }, e->GetDirection() * e->getBulletSpeed()), e);
-                bullets.front().first->setPosition(e->getPosition());
-            }
-        }
-    }
-
-    ctrlNumEnemies();
 
     // update ground
     grnd.update(dt);
@@ -299,19 +275,13 @@ void Game::update(float dt)
                 player->addStar();
                 break;
             case Bonus::Type::grenade:
-                for (auto e : enemies) {
+                for (auto e : enemies)
                     e->kill();
-                    explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2));
-                    explosions.front()->setPosition(e->getPosition());
-                    if (e->getFireCount() == 0)
-                        delete e;
-                }
-                enemies.clear();
-                soundSys.play(SFX::tankExplode);
                 break;
             case Bonus::Type::tank:
                 player->addLife();
                 sound = SFX::getLife;
+                hud.setLifes(player->getNumLifes());
                 break;
             }
             delete bonus;
@@ -320,13 +290,56 @@ void Game::update(float dt)
         }
     }
 
-    player->update(dt, grnd);
+    // Update enemies
+    if (enemies.size() > 0) { // At last 1 enemy
+        auto en_it = enemies.end();
+        do {
+            en_it--;
+            Enemy* en = *en_it;
+            if (en->getHealth() > 0) {
+                if (!timerBonusOn) {
+                    en->update(dt, grnd);
+                    if (en->tryFire()) {
+                        bullets.emplace_front(new Bullet(texture, { 131,102, 3,4 },
+                            en->GetDirection() * en->getBulletSpeed()), en);
+                        bullets.front().first->setPosition(en->getPosition());
+                    }
+                }
+            }
+            else {
+                // Tank explosion
+                explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2, 0.1f));
+                explosions.front()->setPosition(en->getPosition());
+                soundSys.play(SFX::tankExplode);
+
+                if (en->getFireCount() == 0)
+                    delete en;
+                en_it = enemies.erase(en_it);
+            }
+        } while (en_it != enemies.begin());
+    }
+    ctrlNumEnemies();
+
+    // Player tank update
+    if(player->getHealth() > 0)
+        player->update(dt, grnd);
+    else {
+        explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2, 0.1f));
+        explosions.front()->setPosition(player->getPosition());
+        player->setPosition(pSpawnPos);
+        player->addShield(4.f);
+        player->resetStars();
+        player->setHealth(1);
+        player->decNumLifes();
+        soundSys.play(SFX::playerExplode);
+        hud.setLifes(player->getNumLifes());
+    }
 }
 
 void Game::draw()
 {
     mWindow.clear(Color::Black);
-    mWindow.draw(edges);
+    area_hud.draw(hud);
 
     area_grnd.draw(*player);
     for (auto e : enemies)
@@ -357,7 +370,7 @@ void Game::ctrlNumEnemies()
     if (spawnedEnemies < totalEnemies && int(enemies.size()) < maxEnemies) {
         if (enemySpawnDist(rng) == 0) {
             // calc spawn position
-            float halfgrnd = (grnd.getBlockSize() * grnd.getNCols()) / 2.f;
+            float halfgrnd = (grnd.getTileSize() * grnd.getDim().x) / 2.f;
             float x = 16.f + enemyPosDist(rng) * (halfgrnd-16.f);
             // calc type
             int type = enemyTypeDist(rng);
@@ -384,6 +397,8 @@ void Game::ctrlNumEnemies()
             if (enemyBonusMarkDist(rng) > 9) {
                 enemies.front()->setBonusMark();
             }
+
+            hud.removeEnemy();
         }
     }
 }
@@ -401,6 +416,22 @@ void Game::setblocksshovelbonus(int block)
     grnd.setBlock(14, 23, block);
     grnd.setBlock(14, 24, block);
     grnd.setBlock(14, 25, block);
+}
+
+void Game::spawnBonus()
+{
+    int type = bonusTypeDist(rng);
+    if (bonus) // only one bonus is allowed
+        delete bonus;
+    bonus = new Bonus(texture, { 96, 15 * type, 16,15 }, Bonus::Type(type));
+    int grnsz = grnd.getTileSize() * grnd.getDim().x;
+    float x = bonusPosDist(rng);
+    float y = bonusPosDist(rng);
+    // clamp the position
+    x = min(max(x, 16.f), grnsz - 16.f);
+    y = min(max(y, 16.f), grnsz - 16.f);
+    bonus->setPosition({ x, y });
+    soundSys.play(SFX::bonusSpawn);
 }
 
 Game::~Game()

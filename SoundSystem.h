@@ -15,6 +15,8 @@ enum SFX : unsigned int {
 	getBonus,
 	getLife,
 	bulletHitTank,
+	playerExplode,
+	startGame,
 	nSounds
 };
 

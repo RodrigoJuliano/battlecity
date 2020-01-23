@@ -19,7 +19,7 @@ public:
 	virtual void onCollidDown();
 	virtual void onCollidLeft();
 	virtual void onCollidRigth();
-	void setBonusMark();
+	void setBonusMark(bool mark = true);
 	bool hasBonusMark() const;
 };
 

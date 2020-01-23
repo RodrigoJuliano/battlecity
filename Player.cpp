@@ -28,6 +28,11 @@ int Player::getNumLifes()
 	return lifes;
 }
 
+void Player::decNumLifes()
+{
+	lifes--;
+}
+
 void Player::addStar()
 {
 	stars++;
@@ -45,7 +50,6 @@ void Player::addStar()
 		setTextureRect({ 0, 48, 14, 15 });
 		break;
 	}
-	constructShape();
 }
 
 int Player::getNumStars()
@@ -57,7 +61,6 @@ void Player::resetStars()
 {
 	stars = 0;
 	setTextureRect({ 0, 0, 13, 13 });
-	constructShape();
 	setBulletSpeed(330.f);
 	setMaxFire(1);
 }

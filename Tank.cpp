@@ -21,6 +21,8 @@ void Tank::update(float dt, Ground& grnd)
 	p.x += velocity.x * dt;
 	setPosition(p);
 
+	int tileSize = grnd.getTileSize();
+
 	// If collided move back to the side of the block
 
 	// Left
@@ -32,7 +34,7 @@ void Tank::update(float dt, Ground& grnd)
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block on the right
 		// basicaly get the relative ground position, sum 1 and convert back to screen position
-		setPosition({ int(floor(r.left / grnd.blockSize) + 1) * grnd.blockSize + (r.width / 2), p.y });
+		setPosition({ int(floor(r.left / tileSize) + 1) * tileSize + (r.width / 2), p.y });
 		onCollidLeft();
 	}
 	// right
@@ -42,7 +44,7 @@ void Tank::update(float dt, Ground& grnd)
 	b3 = grnd.GetBlock({ r.left + r.width, r.top + r.height });
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block on the left
-		setPosition({ int((r.left + r.width)/ grnd.blockSize) * grnd.blockSize - (r.width / 2) -0.1f, p.y });
+		setPosition({ int((r.left + r.width)/ tileSize) * tileSize - (r.width / 2) -0.1f, p.y });
 		onCollidRigth();
 	}
 
@@ -61,7 +63,7 @@ void Tank::update(float dt, Ground& grnd)
 
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block below
-		setPosition({ p.x, int(floor(r.top / grnd.blockSize) + 1) * grnd.blockSize + (r.height / 2) });
+		setPosition({ p.x, int(floor(r.top / tileSize) + 1) * tileSize + (r.height / 2) });
 		onCollidUp();
 	}
 	// down
@@ -71,7 +73,7 @@ void Tank::update(float dt, Ground& grnd)
 	b3 = grnd.GetBlock({ r.left + r.width / 2, r.top + r.height });
 	if (CollidesWith(b1) || CollidesWith(b2) || CollidesWith(b3)) {
 		// set the x position back to the empty block above
-		setPosition({ p.x, int((r.top + r.height ) / grnd.blockSize) * grnd.blockSize - (r.height / 2) -0.1f});
+		setPosition({ p.x, int((r.top + r.height ) / tileSize) * tileSize - (r.height / 2) -0.1f});
 		onCollidDown();
 	}
 }
@@ -123,4 +125,9 @@ void Tank::setBulletSpeed(float speed)
 void Tank::setMaxFire(int mfire)
 {
 	maxFire = mfire;
+}
+
+void Tank::setHealth(int health)
+{
+	this->health = health;
 }
