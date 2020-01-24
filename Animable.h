@@ -30,5 +30,9 @@ public:
 		}
 	}
 	virtual void onFrameChanged() = 0;
+	void setFrame(int frame) {
+		curFrame = frame;
+		onFrameChanged();
+	}
 };
 

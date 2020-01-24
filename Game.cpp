@@ -18,7 +18,8 @@ Game::Game(RenderWindow& mWindow)
     bonusTypeDist(0, 5),
     bonusPosDist(grnd.getTileSize()*grnd.getDim().x/2.f,100.0f),
     curScreen(Screen::startScreen),
-    hud(texture, curScreen, numStages)
+    hud(texture, curScreen, numStages),
+    falcon(texture, {64, 16, 16, 14}, 2, 32.f, 0.f)
 {
     texture.loadFromFile("resources\\textures.png");
 
@@ -33,6 +34,7 @@ Game::Game(RenderWindow& mWindow)
     // Load sounds
     soundSys.loadSounds("resources\\sounds");
     //soundSys.play(SFX::tankIdle, true);
+    falcon.setPosition({13.f * bs,25.f * bs });
 }
 
 void Game::update(float dt)
@@ -52,7 +54,7 @@ void Game::update(float dt)
 
         bool toggleBlockPressed_new = Keyboard::isKeyPressed(Keyboard::LControl);
         if (!toggleBlockPressed && toggleBlockPressed_new) {
-            if (id == 12)
+            if (id == 4)
                 id = 0;
             else
                 id++;
@@ -74,6 +76,9 @@ void Game::update(float dt)
             customMap = true;
         }
         startPressed = startPressed_new;
+
+        // update ground
+        grnd.update(dt);
         break;
     }
     case Screen::playScreen: {
@@ -204,9 +209,22 @@ void Game::update(float dt)
         // only when the bullet get deleled (bullets keeps the reference).
         for (auto it = bullets.begin(); it != bullets.end(); ++it) {
             it->first->update(dt, grnd);
-
+            // Check bullet colliding with the falcon
+            if (it->first->getCollisionBox().intersects(falcon.getCollisionBox())) {
+                falcon.setFrame(1);
+                soundSys.pause(SFX::tankIdle);
+                soundSys.pause(SFX::tankMove);
+                soundSys.play(SFX::playerExplode);
+                curScreen = Screen::gameOver;
+                pmovesound = false;
+                // Create an explosion
+                explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2, 0.1f));
+                explosions.front()->setPosition(falcon.getPosition());
+                delete it->first;
+                it = bullets.erase(it);
+            }
             // Test bullets colling with ground
-            if (it->first->Collided()) {
+            else if (it->first->Collided()) {
                 // Create an explosion
                 explosions.emplace_front(new Explosion(texture, { 64, 128, 16, 16 }, 3));
                 explosions.front()->setPosition(it->first->getPosition());
@@ -432,6 +450,7 @@ void Game::update(float dt)
             hud.resetEnemCounter();
             soundSys.play(SFX::startGame);
             soundSys.play(SFX::tankIdle, true);
+            player->resetFireCounter();
         }
         break;
     }
@@ -446,6 +465,17 @@ void Game::update(float dt)
                 nPowerTank = 4;
                 nArmorTank = 3;
                 customMap = false;
+                // Set player spawn and the falcon pos to empty tiles
+                // falcon
+                grnd.setBlock(12, 24, -1);
+                grnd.setBlock(12, 25, -1);
+                grnd.setBlock(13, 24, -1);
+                grnd.setBlock(13, 25, -1);
+                // player spawn
+                grnd.setBlock(8, 24, -1);
+                grnd.setBlock(8, 25, -1);
+                grnd.setBlock(9, 24, -1);
+                grnd.setBlock(9, 25, -1);
             }
             else
                 loadLevel(hud.getSelStage());
@@ -454,6 +484,8 @@ void Game::update(float dt)
             hud.resetEnemCounter();
             soundSys.play(SFX::startGame);
             soundSys.play(SFX::tankIdle, true);
+            resetGame();
+            falcon.setFrame(0);
         }
         startPressed = startPressed_new;
 
@@ -515,6 +547,7 @@ void Game::draw()
             area_grnd.draw(*bonus);
         for (auto s : spawners)
             area_grnd.draw(*s);
+        area_grnd.draw(falcon);
         break;
     case Screen::nextStage:
     case Screen::selectStage:
@@ -522,6 +555,7 @@ void Game::draw()
         break;
     case Screen::construct:
         area_grnd.draw(grnd);
+        area_grnd.draw(falcon);
         break;
     //case Screen::startScreen:
     }
@@ -645,6 +679,7 @@ void Game::resetPlayer()
     pSpawner->reset();
     player->setSpawning();
     hud.setLifes(player->getNumLifes());
+    player->resetFireCounter();
 }
 
 void Game::resetGame()

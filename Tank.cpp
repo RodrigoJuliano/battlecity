@@ -131,3 +131,8 @@ void Tank::setHealth(int health)
 {
 	this->health = health;
 }
+
+void Tank::resetFireCounter()
+{
+	fireCounter = 0;
+}

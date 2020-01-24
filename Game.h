@@ -66,6 +66,7 @@ private:
 	int nArmorTank = 0;
 	bool customMap = false;
 	const int numStages = 1;
+	cSprite falcon;
 private:
 	void ctrlNumEnemies();
 	void setblocksshovelbonus(int block);

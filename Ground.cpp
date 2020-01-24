@@ -15,14 +15,13 @@ void Ground::onFrameChanged()
 		for (unsigned int j = 0; j < dim.y; ++j) {
 
 			int id;
-			if (mMap[j * dim.x + i] != -1 &&
-				(id = mMap[j * dim.y + i]) > 11) {
+			if ((id = mMap[j * dim.y + i]) == 4) { // water tile
 
 				// get a pointer to the current tile's quad
 				sf::Vertex* quad = &m_vertices[(i + j * dim.x) * 4];
 
 				// find its position in the tileset texture
-				int tu = (id + curFrame) % tilesPerRow; // 4 tiles per row
+				int tu = (id + curFrame) % tilesPerRow;
 				int tv = id / tilesPerRow;
 
 				// define its 4 texture coordinates
