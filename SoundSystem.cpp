@@ -29,3 +29,13 @@ void SoundSystem::pause(SFX sound)
 {
     sounds[sound].pause();
 }
+
+bool SoundSystem::isPlaying(SFX sound)
+{
+    return sounds[sound].getStatus() == Sound::Status::Playing;
+}
+
+bool SoundSystem::isPaused(SFX sound)
+{
+    return sounds[sound].getStatus() == Sound::Status::Paused;;
+}

@@ -12,6 +12,7 @@
 #include "Bonus.h"
 #include "Player.h"
 #include "Hud.h"
+#include "TankSpawner.h"
 
 using namespace std;
 using namespace sf;
@@ -39,7 +40,6 @@ private:
 	int spawnedEnemies = 0;
 	uniform_int_distribution<int> enemyPosDist;
 	uniform_int_distribution<int> enemySpawnDist;
-	discrete_distribution<int> enemyTypeDist;
 	Vec2 pSpawnPos;
 	SoundSystem soundSys;
 	bool pmovesound = false;
@@ -52,10 +52,27 @@ private:
 	bool shovelBonusOn = false;
 	float shovelBonusTime = 0.f;
 	Hud hud;
+	list<TankSpawner*> spawners;
+	TankSpawner* pSpawner = nullptr;
+	Screen curScreen;
+	bool startPressed = false;
+	bool selectPressed = false;
+	bool aPressed = false;
+	bool bPressed = false;
+	// number of enemies of each type
+	int nBasicTank = 0;
+	int nSpeedTank = 0;
+	int nPowerTank = 0;
+	int nArmorTank = 0;
+	bool customMap = false;
+	const int numStages = 1;
 private:
 	void ctrlNumEnemies();
 	void setblocksshovelbonus(int block);
 	void spawnBonus();
+	void loadLevel(int level);
+	void resetPlayer();
+	void resetGame();
 public:
 	Game(RenderWindow& mWindow);
 	void update(float dt);

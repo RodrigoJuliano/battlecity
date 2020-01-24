@@ -9,6 +9,7 @@ private:
 	float shieldTime = 0.f;
 	int stars = 0;
 	cSprite shield;
+	bool spawning = true;
 public:
 	Player(Texture& tex, IntRect firstframe, IntRect shieldfframe);
 	void addShield(float time);
@@ -16,9 +17,12 @@ public:
 	void addLife();
 	int getNumLifes();
 	void decNumLifes();
+	void setNumLifes(int nLifes);
 	void addStar();
 	int getNumStars();
 	void resetStars();
+	bool isSpawning() const;
+	void setSpawning(bool spawning = true);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 	virtual void update(float dt, Ground& grnd);
 };

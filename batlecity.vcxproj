@@ -185,6 +185,7 @@
     <ClInclude Include="SoundSystem.h" />
     <ClInclude Include="Tank.h" />
     <ClInclude Include="ScreenArea.h" />
+    <ClInclude Include="TankSpawner.h" />
     <ClInclude Include="TileMap.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -13,3 +13,13 @@ namespace Gfx {
 	const int EdgeSize = 40;
 	const int TileSize = TextureResolution * TextureScaleMult;
 }
+
+enum class Screen {
+	startScreen,
+	selectStage,
+	nextStage,
+	construct,
+	pauseScreen,
+	playScreen,
+	gameOver
+};

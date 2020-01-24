@@ -52,20 +52,14 @@ bool Ground::saveToFile(std::string file)
 	return true;
 }
 
-bool Ground::loadFromFile(std::string file)
+bool Ground::loadFromStream(std::istream& stream)
 {
-	std::ifstream f(file);
-	if (f.fail()) {
-		f.close();
-		return false;
-	}
 	int b;
 	for (unsigned int i = 0; i < dim.x; ++i) {
 		for (unsigned int j = 0; j < dim.y; ++j) {
-			f >> b;
+			stream >> b;
 			setBlock(i, j, b);
 		}
 	}
-	f.close();
 	return true;
 }

@@ -11,6 +11,7 @@ void Player::addShield(float time)
 {
 	shielded = true;
 	shieldTime = time;
+	shield.setPosition(getPosition());
 }
 
 bool Player::isShielded()
@@ -31,6 +32,11 @@ int Player::getNumLifes()
 void Player::decNumLifes()
 {
 	lifes--;
+}
+
+void Player::setNumLifes(int nLifes)
+{
+	lifes = nLifes;
 }
 
 void Player::addStar()
@@ -63,6 +69,16 @@ void Player::resetStars()
 	setTextureRect({ 0, 0, 13, 13 });
 	setBulletSpeed(330.f);
 	setMaxFire(1);
+}
+
+bool Player::isSpawning() const
+{
+	return spawning;
+}
+
+void Player::setSpawning(bool spawning)
+{
+	this->spawning = spawning;
 }
 
 void Player::draw(sf::RenderTarget& target, sf::RenderStates states) const

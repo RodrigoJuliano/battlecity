@@ -17,6 +17,7 @@ enum SFX : unsigned int {
 	bulletHitTank,
 	playerExplode,
 	startGame,
+	gameOver,
 	nSounds
 };
 
@@ -30,5 +31,7 @@ public:
 	void play(SFX sound, bool loop = false);
 	void stop(SFX sound);
 	void pause(SFX sound);
+	bool isPlaying(SFX sound);
+	bool isPaused(SFX sound);
 };
 

@@ -13,5 +13,5 @@ public:
 		Vei2 texOring, int tilesPerRow, int nFrames, float frameTime);
 	virtual void onFrameChanged();
 	bool saveToFile(std::string file);
-	bool loadFromFile(std::string file);
+	bool loadFromStream(std::istream& stream);
 };
