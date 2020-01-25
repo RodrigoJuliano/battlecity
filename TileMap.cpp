@@ -7,7 +7,7 @@ int TileMap::GetBlock(const Vec2& pos) const
 {
 	Vei2 gp = toMapPos(pos);
 	if (gp.x < 0 || gp.x > dim.x - 1 || gp.y < 0 || gp.y > dim.y - 1)
-		return 0;
+		return -2; // using -2 as 'out of the map' (-1 is the empty one)
 	return mMap[gp.y * dim.x + gp.x];
 }
 

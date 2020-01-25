@@ -21,7 +21,11 @@ Hud::Hud(Texture& tex, Screen& curScreen, int numStages)
     stageNumText(2, tex),
     // Pause screen
     pause(tex, {97, 176, 38, 7}, 2, 0.f, 0.2f),
-    gameOver(tex, {97, 184, 31, 15}, 1, 0.f)
+    gameOver(tex, {97, 184, 31, 15}, 1, 0.f),
+    // Custruct screen
+    tilePicker({2, 14}, Gfx::TileSize, tex,
+        Gfx::TextureResolution, { 64, 0 }, 4),
+    tileSel(tex, { 0, 128, 43, 7 }, 1, 0.f, 0.f, 1.5f)
 {
     // screen edges
     edges1.setSize({ Gfx::ScreenWidth-40.f, Gfx::ScreenHeight });
@@ -50,6 +54,17 @@ Hud::Hud(Texture& tex, Screen& curScreen, int numStages)
     pause.setPosition({Gfx::ScreenWidth/2, Gfx::ScreenHeight/2});
     // Game Over screen
     gameOver.setPosition({Gfx::ScreenWidth/2, Gfx::ScreenHeight+20.f});
+    // Custruct screen
+    tilePicker.setPosition({ 0.f, 50.f });
+    for (int i = 0; i < 5; i++) {
+        int y = i * 2;
+        tilePicker.setBlock(0, y, i);
+        tilePicker.setBlock(0, y+1, i);
+        tilePicker.setBlock(1, y, i);
+        tilePicker.setBlock(1, y+1, i);
+    }
+    setSelecTile(0);
+    tileSel.setPosition({20.f, 340.f});
 }
 
 void Hud::setLifes(int nlifes)
@@ -97,6 +112,8 @@ void Hud::draw(sf::RenderTarget& target, sf::RenderStates states) const
     case Screen::construct:
         target.draw(edges1);
         target.draw(hudback, states);
+        target.draw(tilePicker, states);
+        target.draw(tileSel, states);
         break;
     case Screen::nextStage:
     case Screen::selectStage:
@@ -190,4 +207,23 @@ void Hud::resetTime()
 {
     endScreenTime = false;
     curScreenTime = 0.f;
+}
+
+int Hud::pickTile(Vec2 pos)
+{
+    return tilePicker.GetBlock(pos);
+}
+
+Vec2 Hud::getPickerPos()
+{
+    return tilePicker.getPosition();
+}
+
+void Hud::setSelecTile(int tile)
+{
+    
+    tilePicker.setBlock(0, startSelec, tile);
+    tilePicker.setBlock(0, startSelec + 1, tile);
+    tilePicker.setBlock(1, startSelec, tile);
+    tilePicker.setBlock(1, startSelec + 1, tile);
 }

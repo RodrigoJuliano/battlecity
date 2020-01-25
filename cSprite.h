@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include "Animable.h"
+#include "Graphics.h"
 
 using namespace sf;
 
@@ -12,8 +13,10 @@ private:
 	VertexArray shape = VertexArray(Quads, 4);
 	IntRect fframe;
 	float collisionSize;
+	float scale;
 public:
-	cSprite(Texture& tex, IntRect firstframe, int nFrames, float collSize, float frameTime = 0.1f);
+	cSprite(Texture& tex, IntRect firstframe, int nFrames, float collSize,
+		float frameTime = 0.1f, float scale = Gfx::TextureScaleMult);
 	Texture& getTexture() const;
 	void constructShape();
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;

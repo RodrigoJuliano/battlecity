@@ -44,31 +44,30 @@ void Game::update(float dt)
     case Screen::construct: {
 
         // Ground editing
-        Vec2 mp = Vec2(Mouse::getPosition(mWindow)) - area_grnd.getOrigin();
+
+        // Mouse pos relative to ground
+        Vec2 mp_grnd = Vec2(Mouse::getPosition(mWindow)) - area_grnd.getOrigin();
+        // Mouse pos relative to tilePicker
+        Vec2 mp_picker = Vec2(Mouse::getPosition(mWindow)) - area_hud.getOrigin()
+            - hud.getPickerPos();
         if (Mouse::isButtonPressed(Mouse::Right)) {
-            grnd.setBlock(mp, -1);
+            grnd.setBlock(mp_grnd, -1); // the pos is checkeed inside setBlock
         }
         if (Mouse::isButtonPressed(Mouse::Left)) {
-            grnd.setBlock(mp, id);
+            grnd.setBlock(mp_grnd, id);
+            // change the selected tile
+            int pick = hud.pickTile(mp_picker);
+            if (pick >= 0) {
+                id = pick;
+                hud.setSelecTile(id);
+            }
         }
 
-        bool toggleBlockPressed_new = Keyboard::isKeyPressed(Keyboard::LControl);
-        if (!toggleBlockPressed && toggleBlockPressed_new) {
-            if (id == 4)
-                id = 0;
-            else
-                id++;
-            cout << "Cur block: " << id << endl;
+        bool saveMapPressed_new = Keyboard::isKeyPressed(Keyboard::F1);
+        if (!saveMapPressed && saveMapPressed_new) {
+            grnd.saveToFile("Map.txt"); // will save with a default numbers of tanks
         }
-        toggleBlockPressed = toggleBlockPressed_new;
-
-        bool spawnEnPressed_new = Keyboard::isKeyPressed(Keyboard::LControl);
-        if (!spawnEnPressed && spawnEnPressed_new) {
-
-            grnd.saveToFile("level2.txt");
-            //grnd.loadFromFile("level1.txt");
-        }
-        spawnEnPressed = spawnEnPressed_new;
+        saveMapPressed = saveMapPressed_new;
 
         bool startPressed_new = Keyboard::isKeyPressed(Keyboard::I);
         if (!startPressed && startPressed_new) {

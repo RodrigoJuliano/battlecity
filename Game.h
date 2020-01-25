@@ -27,7 +27,7 @@ private:
 	Player* player;
 	bool toggleBlockPressed = false;
 	bool firePressed = false;
-	bool spawnEnPressed = false;
+	bool saveMapPressed = false;
 	list<Enemy*> enemies;
 	list<std::pair<Bullet*, Tank*>> bullets;
 	list<Explosion*> explosions;

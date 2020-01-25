@@ -19,10 +19,9 @@ int main()
             if (e.type == Event::Closed)
                 mWindow.close();
         }
+        Time dt = clock.restart();
         if (!mWindow.hasFocus())
             continue;
-
-        Time dt = clock.restart();
         float dtAsSeconds = dt.asSeconds();
         game.update(dtAsSeconds);
         game.draw();

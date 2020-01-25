@@ -39,6 +39,10 @@ private:
 	const float screenTime = 3.f;
 	float curScreenTime = 0.f;
 	bool endScreenTime = false;
+	// Custruct screen
+	TileMap tilePicker;
+	cSprite tileSel;
+	const int startSelec = 12;
 public:
 	Hud(Texture& tex, Screen& curScreen, int numStages);
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const;
@@ -58,5 +62,9 @@ public:
 	// Next stage screen
 	bool canGoNextStage();
 	void resetTime();
+	// Custruct screen
+	int pickTile(Vec2 pos);
+	Vec2 getPickerPos();
+	void setSelecTile(int tile);
 };
 

@@ -1,12 +1,13 @@
 #include "cSprite.h"
-#include "Graphics.h"
 
-cSprite::cSprite(Texture& tex, IntRect firstframe, int nFrames, float collSize, float frameTime)
+cSprite::cSprite(Texture& tex, IntRect firstframe, int nFrames,
+	float collSize, float frameTime, float scale)
 	:
 	Animable(nFrames, frameTime),
 	texture(tex),
 	fframe(firstframe),
-	collisionSize(collSize)
+	collisionSize(collSize),
+	scale(scale)
 {
 	constructShape();
 }
@@ -24,7 +25,7 @@ void cSprite::constructShape()
 	shape[3].texCoords = Vec2(fframe.left, fframe.top + fframe.height);
 
 	setOrigin({ fframe.width * 0.5f, fframe.height * 0.5f });
-	setScale(Gfx::TextureScaleMult, Gfx::TextureScaleMult);
+	setScale(scale, scale);
 }
 
 Texture& cSprite::getTexture() const

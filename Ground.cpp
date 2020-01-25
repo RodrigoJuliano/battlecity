@@ -40,6 +40,11 @@ bool Ground::saveToFile(std::string file)
 		f.close();
 		return false;
 	}
+	// default num of tanks
+	f << 8 << " ";
+	f << 5 << " ";
+	f << 4 << " ";
+	f << 3 << " ";
 
 	for (unsigned int i = 0; i < dim.x; ++i) {
 		for (unsigned int j = 0; j < dim.y; ++j) {
