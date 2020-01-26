@@ -18,7 +18,7 @@ Game::Game(RenderWindow& mWindow)
     bonusTypeDist(0, 5),
     bonusPosDist(grnd.getTileSize()*grnd.getDim().x/2.f,100.0f),
     curScreen(Screen::startScreen),
-    hud(texture, curScreen, numStages),
+    hud(texture, curScreen, 35),
     falcon(texture, {64, 16, 16, 14}, 2, 32.f, 0.f)
 {
     texture.loadFromFile("resources\\textures.png");
