@@ -10,7 +10,7 @@ Bullet::Bullet(Texture& tex, IntRect texRect, Vec2 velocity, bool canBreakSteel)
 
 bool Bullet::CollidesWith(int block) const
 {
-	return Entity::CollidesWith(block) && block != 12;
+	return Entity::CollidesWith(block) && block != 4; // water tile
 }
 
 void Bullet::update(float dt, Ground& grnd)

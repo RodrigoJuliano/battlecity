@@ -18,7 +18,7 @@ protected:
 	Vei2 texOring;
 public:
 	void setBlock(int x, int y, int tile);
-	void setBlock(const Vec2& pos, int); // screen relative pos 
+	void setBlock(const Vec2& pos, int tile); // screen relative pos 
 	TileMap(Vei2 dimension, int tileSize, Texture& tex, int texRes,
 		Vei2 texOring, int tilesPerRow);
 	int GetBlock(const Vec2& pos) const;

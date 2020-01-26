@@ -53,7 +53,7 @@ Hud::Hud(Texture& tex, Screen& curScreen, int numStages)
     // Pause screen
     pause.setPosition({Gfx::ScreenWidth/2, Gfx::ScreenHeight/2});
     // Game Over screen
-    gameOver.setPosition({Gfx::ScreenWidth/2, Gfx::ScreenHeight+20.f});
+    resetGameOverPos();
     // Custruct screen
     tilePicker.setPosition({ 0.f, 50.f });
     for (int i = 0; i < 5; i++) {
@@ -169,14 +169,6 @@ int Hud::getSelStage() const
 
 void Hud::update(float dt)
 {
-    if(curScreen == Screen::pauseScreen)
-        pause.update(dt);
-    else if (curScreen == Screen::gameOver) {
-        Vec2 pos = gameOver.getPosition();
-        if (pos.y > Gfx::ScreenHeight / 2.f) {
-            gameOver.move({ 0.f, dt * -200 });
-        }
-    }
     switch (curScreen)
     {
     case Screen::pauseScreen:
@@ -196,6 +188,11 @@ void Hud::update(float dt)
         curScreenTime += dt;
         break;
     }
+}
+
+void Hud::resetGameOverPos()
+{
+    gameOver.setPosition({ Gfx::ScreenWidth / 2, Gfx::ScreenHeight + 20.f });
 }
 
 bool Hud::canGoNextStage()

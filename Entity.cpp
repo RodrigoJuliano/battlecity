@@ -35,7 +35,7 @@ void Entity::setVel(Vec2 vel)
 
 bool Entity::CollidesWith(int block) const
 {
-	return (block != -1 && block != 2);
+	return (block != -1 && block != 2 && block != 3); // empty, tree and ice
 }
 
 void Entity::update(float dt, Ground& grnd)

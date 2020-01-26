@@ -159,6 +159,7 @@ void Game::update(float dt)
             bool startPressed_new = Keyboard::isKeyPressed(Keyboard::I);
             if (!startPressed && startPressed_new) {
                 curScreen = Screen::startScreen;
+                hud.resetGameOverPos();
             }
             startPressed = startPressed_new;
         }
@@ -415,7 +416,7 @@ void Game::update(float dt)
 
         // Stage complete
         if (spawnedEnemies == totalEnemies && enemies.size() == 0) {
-            //hud.nextStage();
+            hud.nextStage();
             soundSys.pause(SFX::tankMove);
             soundSys.pause(SFX::tankIdle);
             curScreen = Screen::nextStage;
@@ -492,13 +493,13 @@ void Game::update(float dt)
         if (!aPressed && aPressed_new) {
             hud.prevStage();
         }
-        aPressed = startPressed_new;
+        aPressed = aPressed_new;
 
         bool bPressed_new = Keyboard::isKeyPressed(Keyboard::K);
         if (!bPressed && bPressed_new) {
             hud.nextStage();
         }
-        bPressed = startPressed_new;
+        bPressed = bPressed_new;
 
         break;
     }
@@ -530,16 +531,17 @@ void Game::draw()
     {
     case Screen::pauseScreen:
     case Screen::playScreen:
+    case Screen::gameOver:
+        area_grnd.draw(grnd);
         if (player->isSpawning())
             area_grnd.draw(*pSpawner);
         else
             area_grnd.draw(*player);
-    case Screen::gameOver:
         for (auto e : enemies)
             area_grnd.draw(*e);
-        area_grnd.draw(grnd);
         for (auto& e : bullets)
             area_grnd.draw(*(e.first));
+        grnd.drawTrees(area_grnd);
         for (auto e : explosions)
             area_grnd.draw(*e);
         if (bonus)
@@ -605,9 +607,9 @@ void Game::ctrlNumEnemies()
                 nPowerTank--;
                 break;
             case 3: // armor
-                break;
                 health = 4;
                 nArmorTank--;
+                break;
             }
             // spawn
             Enemy* enem = new Enemy(texture, { 0, 64 + 16 * type,13,16 }, rng, health, bulletspeed);
@@ -655,7 +657,7 @@ void Game::spawnBonus()
 
 void Game::loadLevel(int level)
 {
-    ifstream in("resources\\level" + to_string(level) + ".txt");
+    ifstream in("resources\\levels\\level" + to_string(level) + ".txt");
     if (in.fail()) {
         cout << "Error opening file." << endl;
         exit(-1);

@@ -5,7 +5,8 @@ Ground::Ground(Vei2 dimension, int tileSize, Texture& tex, int texRes,
 	Vei2 texOring, int tilesPerRow, int nFrames, float frameTime)
 	:
 	TileMap(dimension, tileSize, tex, texRes, texOring, tilesPerRow),
-	Animable(nFrames, frameTime)
+	Animable(nFrames, frameTime),
+	trees(dimension, tileSize, tex, texRes, texOring, tilesPerRow)
 {
 }
 
@@ -44,7 +45,7 @@ bool Ground::saveToFile(std::string file)
 	f << 8 << " ";
 	f << 5 << " ";
 	f << 4 << " ";
-	f << 3 << " ";
+	f << 3 << " \n";
 
 	for (unsigned int i = 0; i < dim.x; ++i) {
 		for (unsigned int j = 0; j < dim.y; ++j) {
@@ -66,4 +67,27 @@ bool Ground::loadFromStream(std::istream& stream)
 		}
 	}
 	return true;
+}
+
+void Ground::setBlock(int x, int y, int tile)
+{
+	TileMap::setBlock(x, y, tile);
+	if (tile == 2)
+		trees.setBlock(x, y, tile);
+	else
+		trees.setBlock(x, y, -1);
+}
+
+void Ground::setBlock(const Vec2& pos, int tile)
+{
+	TileMap::setBlock(pos, tile);
+	if (tile == 2)
+		trees.setBlock(pos, tile);
+	else
+		trees.setBlock(pos, -1);
+}
+
+void Ground::drawTrees(ScreenArea& sa)
+{
+	sa.draw(trees);
 }

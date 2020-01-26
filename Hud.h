@@ -46,6 +46,7 @@ private:
 public:
 	Hud(Texture& tex, Screen& curScreen, int numStages);
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+	void update(float dt);
 	// Play screen
 	void setLifes(int lifes);
 	void removeEnemy();
@@ -57,8 +58,8 @@ public:
 	void prevStage();
 	void nextStage();
 	int getSelStage() const;
-	// Pause screen
-	void update(float dt);
+	// Game over screen
+	void resetGameOverPos();
 	// Next stage screen
 	bool canGoNextStage();
 	void resetTime();
