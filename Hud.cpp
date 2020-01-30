@@ -218,9 +218,15 @@ Vec2 Hud::getPickerPos()
 
 void Hud::setSelecTile(int tile)
 {
-    
     tilePicker.setBlock(0, startSelec, tile);
     tilePicker.setBlock(0, startSelec + 1, tile);
     tilePicker.setBlock(1, startSelec, tile);
     tilePicker.setBlock(1, startSelec + 1, tile);
+
+    selectedTile = tile;
+}
+
+int Hud::getSelecTile() const
+{
+    return selectedTile;
 }

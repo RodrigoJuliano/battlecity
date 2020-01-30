@@ -43,6 +43,7 @@ private:
 	TileMap tilePicker;
 	cSprite tileSel;
 	const int startSelec = 12;
+	int selectedTile;
 public:
 	Hud(Texture& tex, Screen& curScreen, int numStages);
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const;
@@ -67,5 +68,6 @@ public:
 	int pickTile(Vec2 pos);
 	Vec2 getPickerPos();
 	void setSelecTile(int tile);
+	int getSelecTile() const;
 };
 

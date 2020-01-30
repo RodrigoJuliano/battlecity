@@ -55,12 +55,11 @@ void Game::update(float dt)
             grnd.setBlock(mp_grnd, -1); // the pos is checkeed inside setBlock
         }
         if (Mouse::isButtonPressed(Mouse::Button::Left)) {
-            grnd.setBlock(mp_grnd, id);
+            grnd.setBlock(mp_grnd, hud.getSelecTile());
             // change the selected tile
             int pick = hud.pickTile(mp_picker);
             if (pick >= 0) {
-                id = pick;
-                hud.setSelecTile(id);
+                hud.setSelecTile(pick);
             }
         }
 

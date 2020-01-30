@@ -23,7 +23,6 @@ private:
 	RenderWindow& mWindow;
 	Ground grnd;
 	Texture texture;
-	int id = 0;
 	Player* player;
 	list<Enemy*> enemies;
 	list<std::pair<Bullet*, Tank*>> bullets;
