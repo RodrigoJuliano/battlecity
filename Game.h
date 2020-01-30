@@ -25,9 +25,6 @@ private:
 	Texture texture;
 	int id = 0;
 	Player* player;
-	bool toggleBlockPressed = false;
-	bool firePressed = false;
-	bool saveMapPressed = false;
 	list<Enemy*> enemies;
 	list<std::pair<Bullet*, Tank*>> bullets;
 	list<Explosion*> explosions;
@@ -55,10 +52,6 @@ private:
 	list<TankSpawner*> spawners;
 	TankSpawner* pSpawner = nullptr;
 	Screen curScreen;
-	bool startPressed = false;
-	bool selectPressed = false;
-	bool aPressed = false;
-	bool bPressed = false;
 	// number of enemies of each type
 	int nBasicTank = 0;
 	int nSpeedTank = 0;

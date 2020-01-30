@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "Kbd.h"
 
 Game::Game(RenderWindow& mWindow)
     :
@@ -33,7 +34,7 @@ Game::Game(RenderWindow& mWindow)
 
     // Load sounds
     soundSys.loadSounds("resources\\sounds");
-    //soundSys.play(SFX::tankIdle, true);
+
     falcon.setPosition({13.f * bs,25.f * bs });
 }
 
@@ -50,10 +51,10 @@ void Game::update(float dt)
         // Mouse pos relative to tilePicker
         Vec2 mp_picker = Vec2(Mouse::getPosition(mWindow)) - area_hud.getOrigin()
             - hud.getPickerPos();
-        if (Mouse::isButtonPressed(Mouse::Right)) {
+        if (Mouse::isButtonPressed(Mouse::Button::Right)) {
             grnd.setBlock(mp_grnd, -1); // the pos is checkeed inside setBlock
         }
-        if (Mouse::isButtonPressed(Mouse::Left)) {
+        if (Mouse::isButtonPressed(Mouse::Button::Left)) {
             grnd.setBlock(mp_grnd, id);
             // change the selected tile
             int pick = hud.pickTile(mp_picker);
@@ -63,18 +64,14 @@ void Game::update(float dt)
             }
         }
 
-        bool saveMapPressed_new = Keyboard::isKeyPressed(Keyboard::F1);
-        if (!saveMapPressed && saveMapPressed_new) {
+        if (Kbd::startedPressKey(KbdKey::F1)) {
             grnd.saveToFile("Map.txt"); // will save with a default numbers of tanks
         }
-        saveMapPressed = saveMapPressed_new;
 
-        bool startPressed_new = Keyboard::isKeyPressed(Keyboard::I);
-        if (!startPressed && startPressed_new) {
+        if (Kbd::startedPressKey(KbdKey::I)) {
             curScreen = Screen::selectStage;
             customMap = true;
         }
-        startPressed = startPressed_new;
 
         // update ground
         grnd.update(dt);
@@ -85,16 +82,16 @@ void Game::update(float dt)
         // Player update
         bool pmovesound_new = true;
         if (!player->isSpawning()) {
-            if (Keyboard::isKeyPressed(Keyboard::W)) {
+            if (Kbd::isKeyPressed(KbdKey::W)) {
                 player->setVel({ 0.0f, -100.0f });
             }
-            else if (Keyboard::isKeyPressed(Keyboard::S)) {
+            else if (Kbd::isKeyPressed(KbdKey::S)) {
                 player->setVel({ 0.0f, 100.0f });
             }
-            else if (Keyboard::isKeyPressed(Keyboard::A)) {
+            else if (Kbd::isKeyPressed(KbdKey::A)) {
                 player->setVel({ -100.0f, 0.0f });
             }
-            else if (Keyboard::isKeyPressed(Keyboard::D)) {
+            else if (Kbd::isKeyPressed(KbdKey::D)) {
                 player->setVel({ 100.0f, 0.0f });
             }
             else {
@@ -102,8 +99,7 @@ void Game::update(float dt)
                 pmovesound_new = false;
             }
             // Player fire
-            bool firePressed_new = Keyboard::isKeyPressed(Keyboard::RShift);
-            if (!firePressed && firePressed_new) {
+            if (Kbd::startedPressKey(KbdKey::J)) {
                 if (player->tryFire()) {
                     bullets.emplace_front(new Bullet(texture, { 131,102, 3,4 },
                         player->GetDirection() * player->getBulletSpeed(), player->getNumStars() > 2), player);
@@ -111,7 +107,6 @@ void Game::update(float dt)
                     soundSys.play(SFX::shoot);
                 }
             }
-            firePressed = firePressed_new;
 
             if (player->getHealth() > 0)
                 player->update(dt, grnd);
@@ -156,12 +151,11 @@ void Game::update(float dt)
         // this is inside gameScreen so we need to check
         if (curScreen == Screen::gameOver) {
             hud.update(dt);
-            bool startPressed_new = Keyboard::isKeyPressed(Keyboard::I);
-            if (!startPressed && startPressed_new) {
+            if (Kbd::startedPressKey(KbdKey::I)) {
                 curScreen = Screen::startScreen;
                 hud.resetGameOverPos();
+                return;
             }
-            startPressed = startPressed_new;
         }
     }
     { // playScreen
@@ -402,8 +396,7 @@ void Game::update(float dt)
             } while (sp_it != spawners.begin());
         }
 
-        bool startPressed_new = Keyboard::isKeyPressed(Keyboard::I);
-        if (!startPressed && startPressed_new) {
+        if (Kbd::startedPressKey(KbdKey::I)) {
             curScreen = Screen::pauseScreen;
             if (soundSys.isPlaying(SFX::tankIdle))
                 soundSys.pause(SFX::tankIdle);
@@ -412,7 +405,6 @@ void Game::update(float dt)
             if (soundSys.isPlaying(SFX::startGame))
                 soundSys.pause(SFX::startGame);
         }
-        startPressed = startPressed_new;
 
         // Stage complete
         if (spawnedEnemies == totalEnemies && enemies.size() == 0) {
@@ -426,14 +418,12 @@ void Game::update(float dt)
     }
     case Screen::pauseScreen: {
         hud.update(dt);
-        bool startPressed_new = Keyboard::isKeyPressed(Keyboard::I);
-        if (!startPressed && startPressed_new) {
+        if (Kbd::startedPressKey(KbdKey::I)) {
             curScreen = Screen::playScreen;
             soundSys.play(SFX::tankIdle, true);
             if (soundSys.isPaused(SFX::startGame))
                 soundSys.play(SFX::startGame);
         }
-        startPressed = startPressed_new;
         break;
     }
     case Screen::nextStage: {
@@ -455,8 +445,7 @@ void Game::update(float dt)
         break;
     }
     case Screen::selectStage: {
-        bool startPressed_new = Keyboard::isKeyPressed(Keyboard::I);
-        if (!startPressed && startPressed_new) {
+        if (Kbd::startedPressKey(KbdKey::I)) {
             curScreen = Screen::playScreen;
             if (customMap) {
                 // default number of tanks for custom maps
@@ -487,37 +476,28 @@ void Game::update(float dt)
             resetGame();
             falcon.setFrame(0);
         }
-        startPressed = startPressed_new;
 
-        bool aPressed_new = Keyboard::isKeyPressed(Keyboard::J);
-        if (!aPressed && aPressed_new) {
+        if (Kbd::startedPressKey(KbdKey::S)) {
             hud.prevStage();
         }
-        aPressed = aPressed_new;
 
-        bool bPressed_new = Keyboard::isKeyPressed(Keyboard::K);
-        if (!bPressed && bPressed_new) {
+        if (Kbd::startedPressKey(KbdKey::W)) {
             hud.nextStage();
         }
-        bPressed = bPressed_new;
 
         break;
     }
     case Screen::startScreen: {
-        bool startPressed_new = Keyboard::isKeyPressed(Keyboard::I);
-        if (!startPressed && startPressed_new) {
+        if (Kbd::startedPressKey(KbdKey::I)) {
             if (hud.getSelected() == 0)
                 curScreen = Screen::selectStage;
             else
                 curScreen = Screen::construct;
         }
-        startPressed = startPressed_new;
 
-        bool selectPressed_new = Keyboard::isKeyPressed(Keyboard::U);
-        if (!selectPressed && selectPressed_new) {
+        if (Kbd::startedPressKey(KbdKey::U)) {
             hud.toggleSelect();
         }
-        selectPressed = selectPressed_new;
         break;
     }
     }
@@ -533,6 +513,7 @@ void Game::draw()
     case Screen::playScreen:
     case Screen::gameOver:
         area_grnd.draw(grnd);
+        area_grnd.draw(falcon);
         if (player->isSpawning())
             area_grnd.draw(*pSpawner);
         else
@@ -548,7 +529,6 @@ void Game::draw()
             area_grnd.draw(*bonus);
         for (auto s : spawners)
             area_grnd.draw(*s);
-        area_grnd.draw(falcon);
         break;
     case Screen::nextStage:
     case Screen::selectStage:
