@@ -1,10 +1,9 @@
 #pragma once
-#include <SFML/Graphics.hpp>
+
 #include "Graphics.h"
 #include "cSprite.h"
 #include "Ground.h"
 
-using namespace sf;
 using namespace std;
 
 class Entity : public cSprite

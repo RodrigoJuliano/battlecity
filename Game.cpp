@@ -380,9 +380,9 @@ void Game::update(float dt)
         }
         ctrlNumEnemies();
 
-        // Update spawners
-        if (spawners.size() > 0) {
-            auto sp_it = spawners.end();
+        // Update enemy_spawners
+        if (enemy_spawners.size() > 0) {
+            auto sp_it = enemy_spawners.end();
             do {
                 sp_it--;
                 TankSpawner* ts = *sp_it;
@@ -390,9 +390,9 @@ void Game::update(float dt)
                 if (ts->mustSpawn()) {
                     enemies.push_front(dynamic_cast<Enemy*>(ts->getTank()));
                     delete ts;
-                    sp_it = spawners.erase(sp_it);
+                    sp_it = enemy_spawners.erase(sp_it);
                 }
-            } while (sp_it != spawners.begin());
+            } while (sp_it != enemy_spawners.begin());
         }
 
         if (Kbd::startedPressKey(KbdKey::I)) {
@@ -406,7 +406,7 @@ void Game::update(float dt)
         }
 
         // Stage complete
-        if (spawnedEnemies == totalEnemies && enemies.size() == 0) {
+        if (totalSpawnedEnemies == totalEnemies && enemies.size() == 0) {
             hud.nextStage();
             soundSys.pause(SFX::tankMove);
             soundSys.pause(SFX::tankIdle);
@@ -526,7 +526,7 @@ void Game::draw()
             area_grnd.draw(*e);
         if (bonus)
             area_grnd.draw(*bonus);
-        for (auto s : spawners)
+        for (auto s : enemy_spawners)
             area_grnd.draw(*s);
         break;
     case Screen::nextStage:
@@ -557,7 +557,7 @@ void Game::draw()
 void Game::ctrlNumEnemies()
 {
     // check if can spawn an enemy
-    if (spawnedEnemies < totalEnemies && int(enemies.size() + spawners.size()) < maxEnemies) {
+    if (totalSpawnedEnemies < totalEnemies && int(enemies.size() + enemy_spawners.size()) < maxEnemies) {
         if (enemySpawnDist(rng) == 0) {
             // calc spawn position
             float halfgrnd = (grnd.getTileSize() * grnd.getDim().x) / 2.f;
@@ -593,11 +593,11 @@ void Game::ctrlNumEnemies()
             // spawn
             Enemy* enem = new Enemy(texture, { 0, 64 + 16 * type,13,16 }, rng, health, bulletspeed);
             enem->setVel({ 0.f,speed });
-            spawnedEnemies++;
+            totalSpawnedEnemies++;
             if (enemyBonusMarkDist(rng) > 9) {
                 enem->setBonusMark();
             }
-            spawners.emplace_front(new TankSpawner(texture, enem, 1.2f, { x, 16.f }));
+            enemy_spawners.emplace_front(new TankSpawner(texture, enem, 1.2f, { x, 16.f }));
             hud.removeEnemy();
         }
     }
@@ -674,13 +674,13 @@ void Game::resetGame()
         delete bonus;
         bonus = nullptr;
     }
-    for (auto s : spawners)
+    for (auto s : enemy_spawners)
         delete s;
     bullets.clear();
     enemies.clear();
     explosions.clear();
-    spawners.clear();
-    spawnedEnemies = 0;
+    enemy_spawners.clear();
+    totalSpawnedEnemies = 0;
     pmovesound = false;
 }
 

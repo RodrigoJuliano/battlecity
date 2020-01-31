@@ -1,11 +1,8 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include "TileMap.h"
 #include "Animable.h"
 #include "ScreenArea.h"
-
-using namespace sf;
 
 class Ground : public TileMap, public Animable
 {

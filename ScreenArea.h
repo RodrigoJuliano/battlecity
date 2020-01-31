@@ -11,20 +11,7 @@ private:
 	RenderWindow& mWindow;
 	Transform transf;
 public:
-	ScreenArea(RenderWindow& mWindow, Vec2 origin)
-		:
-		mWindow(mWindow),
-		origin(origin)
-	{
-		transf.translate(origin);
-	}
-
-	void draw(Drawable& t) const {
-		mWindow.draw(t, transf);
-	}
-
-	Vec2 getOrigin() {
-		return origin;
-	}
+	ScreenArea(RenderWindow& mWindow, Vec2 origin);
+	void draw(Drawable& t) const;
+	Vec2 getOrigin();
 };
-

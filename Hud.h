@@ -1,9 +1,9 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include "cSprite.h"
 #include "TileMap.h"
 #include "Counter.h"
+#include <SFML/Graphics.hpp>
 
 using namespace sf;
 

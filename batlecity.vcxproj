@@ -157,17 +157,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Animable.cpp" />
     <ClCompile Include="batlecity.cpp" />
+    <ClCompile Include="Bonus.cpp" />
     <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="Counter.cpp" />
     <ClCompile Include="cSprite.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Ground.cpp" />
     <ClCompile Include="Hud.cpp" />
+    <ClCompile Include="Kbd.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="ScreenArea.cpp" />
     <ClCompile Include="SoundSystem.cpp" />
     <ClCompile Include="Tank.cpp" />
+    <ClCompile Include="TankSpawner.cpp" />
     <ClCompile Include="TileMap.cpp" />
   </ItemGroup>
   <ItemGroup>
