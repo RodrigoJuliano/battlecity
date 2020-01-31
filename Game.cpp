@@ -27,7 +27,7 @@ Game::Game(RenderWindow& mWindow)
     int bs = grnd.getTileSize();
     pSpawnPos = Vec2(bs * 9.f, bs * 25.f);
 
-    player = new Player(texture, { 0,0,13,13 }, {64,144, 16,16});
+    player = new Player(texture, { 0,0,13,13 }, {29, 17, 16, 16});
     player->addShield(4.f);
 
     pSpawner = new TankSpawner(texture, pSpawnPos);
@@ -75,7 +75,7 @@ void Game::update(float dt)
             grnd.saveToFile("Map.txt"); // will save with a default numbers of tanks
         }
 
-        if (Kbd::startedPressKey(KbdKey::I)) {
+        if (Kbd::startedPressKey(KbdKey::Enter)) {
             curScreen = Screen::selectStage;
             customMap = true;
         }
@@ -108,7 +108,7 @@ void Game::update(float dt)
             // Player fire
             if (Kbd::startedPressKey(KbdKey::J)) {
                 if (player->tryFire()) {
-                    bullets.emplace_front(new Bullet(texture, { 131,102, 3,4 },
+                    bullets.emplace_front(new Bullet(texture, { 82, 48, 3, 4 },
                         player->GetDirection() * player->getBulletSpeed(), player->getNumStars() > 2), player);
                     bullets.front().first->setPosition(player->getPosition());
                     soundSys.play(SFX::shoot);
@@ -118,7 +118,7 @@ void Game::update(float dt)
             if (player->getHealth() > 0)
                 player->update(dt, grnd);
             else {
-                explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2, 0.1f));
+                explosions.emplace_front(new Explosion(texture, { 39, 64, 32, 32 }, 2, 0.1f));
                 explosions.front()->setPosition(player->getPosition());
                 if (player->getNumLifes() > 0) {
                     player->decNumLifes();
@@ -158,7 +158,7 @@ void Game::update(float dt)
         // this is inside gameScreen so we need to check
         if (curScreen == Screen::gameOver) {
             hud.update(dt);
-            if (Kbd::startedPressKey(KbdKey::I)) {
+            if (Kbd::startedPressKey(KbdKey::Enter)) {
                 curScreen = Screen::startScreen;
                 hud.resetGameOverPos();
                 return;
@@ -219,7 +219,7 @@ void Game::update(float dt)
                 curScreen = Screen::gameOver;
                 pmovesound = false;
                 // Create an explosion
-                explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2, 0.1f));
+                explosions.emplace_front(new Explosion(texture, { 39, 64, 32, 32 }, 2, 0.1f));
                 explosions.front()->setPosition(falcon.getPosition());
                 delete it->first;
                 it = bullets.erase(it);
@@ -227,7 +227,7 @@ void Game::update(float dt)
             // Test bullets colling with ground
             else if (it->first->Collided()) {
                 // Create an explosion
-                explosions.emplace_front(new Explosion(texture, { 64, 128, 16, 16 }, 3));
+                explosions.emplace_front(new Explosion(texture, { 31, 47, 16, 16 }, 3));
                 explosions.front()->setPosition(it->first->getPosition());
                 if (it->second == player)
                     soundSys.play(SFX::bulletHit);
@@ -253,7 +253,7 @@ void Game::update(float dt)
                         }
                         if (enem->getHealth() > 0) {
                             // Bullet explosion
-                            explosions.emplace_front(new Explosion(texture, { 64, 128, 16, 16 }, 3));
+                            explosions.emplace_front(new Explosion(texture, { 31, 47, 16, 16 }, 3));
                             explosions.front()->setPosition(it->first->getPosition());
                             soundSys.play(SFX::bulletHitTank);
                         }
@@ -368,7 +368,7 @@ void Game::update(float dt)
                     if (!timerBonusOn) {
                         en->update(dt, grnd);
                         if (en->tryFire()) {
-                            bullets.emplace_front(new Bullet(texture, { 131,102, 3,4 },
+                            bullets.emplace_front(new Bullet(texture, { 82, 48, 3, 4 },
                                 en->GetDirection() * en->getBulletSpeed()), en);
                             bullets.front().first->setPosition(en->getPosition());
                         }
@@ -376,7 +376,7 @@ void Game::update(float dt)
                 }
                 else {
                     // Tank explosion
-                    explosions.emplace_front(new Explosion(texture, { 112, 128, 32, 32 }, 2, 0.1f));
+                    explosions.emplace_front(new Explosion(texture, { 39, 64, 32, 32 }, 2, 0.1f));
                     explosions.front()->setPosition(en->getPosition());
                     soundSys.play(SFX::tankExplode);
 
@@ -400,7 +400,7 @@ void Game::update(float dt)
             }
         }
 
-        if (Kbd::startedPressKey(KbdKey::I)) {
+        if (Kbd::startedPressKey(KbdKey::Enter)) {
             curScreen = Screen::pauseScreen;
             if (soundSys.isPlaying(SFX::tankIdle))
                 soundSys.pause(SFX::tankIdle);
@@ -422,7 +422,7 @@ void Game::update(float dt)
     }
     case Screen::pauseScreen: {
         hud.update(dt);
-        if (Kbd::startedPressKey(KbdKey::I)) {
+        if (Kbd::startedPressKey(KbdKey::Enter)) {
             curScreen = Screen::playScreen;
             soundSys.play(SFX::tankIdle, true);
             if (soundSys.isPaused(SFX::startGame))
@@ -448,7 +448,7 @@ void Game::update(float dt)
         break;
     }
     case Screen::selectStage: {
-        if (Kbd::startedPressKey(KbdKey::I)) {
+        if (Kbd::startedPressKey(KbdKey::Enter)) {
             curScreen = Screen::playScreen;
             if (customMap) {
                 // default number of tanks for custom maps
@@ -491,14 +491,14 @@ void Game::update(float dt)
         break;
     }
     case Screen::startScreen: {
-        if (Kbd::startedPressKey(KbdKey::I)) {
+        if (Kbd::startedPressKey(KbdKey::Enter)) {
             if (hud.getSelected() == 0)
                 curScreen = Screen::selectStage;
             else
                 curScreen = Screen::construct;
         }
 
-        if (Kbd::startedPressKey(KbdKey::U)) {
+        if (Kbd::startedPressKey(KbdKey::W) || Kbd::startedPressKey(KbdKey::S)) {
             hud.toggleSelect();
         }
         break;
@@ -633,7 +633,7 @@ void Game::spawnBonus()
     int type = bonusTypeDist(rng);
     if (bonus) // only one bonus is allowed
         delete bonus;
-    bonus = new Bonus(texture, { 96, 15 * type, 16,15 }, Bonus::Type(type));
+    bonus = new Bonus(texture, { 108, 15 * type, 16,15 }, Bonus::Type(type));
     int grnsz = grnd.getTileSize() * grnd.getDim().x;
     float x = bonusPosDist(rng);
     float y = bonusPosDist(rng);

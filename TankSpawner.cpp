@@ -2,7 +2,7 @@
 
 TankSpawner::TankSpawner(Texture& tex, Vec2 pos, float time2spawn)
 	:
-	cSprite(tex, { 64, 112, 16, 14 }, 4, 0.f, 0.1f),
+	cSprite(tex, { 30, 33, 16, 14 }, 4, 0.f, 0.1f),
 	time2spawn(time2spawn)
 {
 	setPosition(pos);

@@ -2,7 +2,7 @@
 
 Counter::Counter(int nChars, Texture& tex)
 	:
-	TileMap({ nChars, 1 }, Gfx::TileSize, tex, Gfx::TextureResolution, { 136 , 184 }, 5)
+	TileMap({ nChars, 1 }, Gfx::TileSize, tex, Gfx::TextureResolution, { 41 , 105 }, 5)
 {
 
 }

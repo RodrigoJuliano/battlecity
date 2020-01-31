@@ -7,25 +7,25 @@ Hud::Hud(Texture& tex, Screen& curScreen, int numStages)
     curScreen(curScreen),
     numStages(numStages),
     // Play screen
-    lifesholder(tex, {184, 136, 16, 16}, 1, 0.f),
-    levelholder(tex, {184, 184, 16, 15}, 1, 0.f),
+    lifesholder(tex, {30, 0, 16, 16}, 1, 0.f),
+    levelholder(tex, {47, 0, 16, 15}, 1, 0.f),
     lifes(1, tex),
     level(2, tex),
     enemCounter({2, 10}, Gfx::TileSize, tex,
-        Gfx::TextureResolution, {128, 192}, 1),
+        Gfx::TextureResolution, {82, 97}, 1),
     // Start screen
     title(titleTex, {0, 0, 188, 111}, 1, 0.f),
     selecter(tex, { 0,0,13,13 }, 1, 0.f),
     // Select stage screen
-    stage(tex, {136, 176, 39, 7}, 1, 0.f),
+    stage(tex, {41, 97, 39, 7}, 1, 0.f),
     stageNumText(2, tex),
     // Pause screen
-    pause(tex, {97, 176, 38, 7}, 2, 0.f, 0.2f),
-    gameOver(tex, {97, 184, 31, 15}, 1, 0.f),
+    pause(tex, {86, 121, 38, 7}, 2, 0.f, 0.2f),
+    gameOver(tex, {86, 105, 31, 15}, 1, 0.f),
     // Custruct screen
     tilePicker({2, 14}, Gfx::TileSize, tex,
         Gfx::TextureResolution, { 64, 0 }, 4),
-    tileSel(tex, { 0, 128, 43, 7 }, 1, 0.f, 0.f, 1.5f)
+    tileSel(tex, { 41, 121, 43, 7 }, 1, 0.f, 0.f, 1.5f)
 {
     // screen edges
     edges1.setSize({ Gfx::ScreenWidth-40.f, Gfx::ScreenHeight });
