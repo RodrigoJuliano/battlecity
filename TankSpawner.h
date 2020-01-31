@@ -7,12 +7,14 @@ class TankSpawner : public cSprite
 private:
 	const float time2spawn;
 	float curTime = 0.f;
-	Tank* tank;
+	Tank* tank = nullptr;
 public:
-	TankSpawner(Texture& tex, Tank* tank, float time2spawn, Vec2 pos);
+	TankSpawner(Texture& tex, Vec2 pos, float time2spawn = 1.2f);
 	void update(float dt);
 	bool mustSpawn() const;
-	Tank* getTank() const;
+	Tank* spawnTank();
 	void reset();
+	bool isSpawning() const;
+	void startSpawn(Tank* tank);
 };
 

@@ -38,7 +38,7 @@ private:
 	// Player
 	Player* player;
 	Vec2 pSpawnPos;
-	TankSpawner* pSpawner = nullptr;
+	TankSpawner* pSpawner;
 	bool pmovesound = false;
 	// enemies
 	list<Enemy*> enemies;
@@ -48,7 +48,9 @@ private:
 	uniform_int_distribution<int> enemyPosDist;
 	uniform_int_distribution<int> enemySpawnDist;
 	uniform_int_distribution<int> enemyBonusMarkDist;
-	list<TankSpawner*> enemy_spawners;
+	TankSpawner* enemy_spawners;
+	static const int nEnSpawners = 3;
+	int spawningCount = 0;
 	// number of enemies of each type
 	int nBasicTank = 0;
 	int nSpeedTank = 0;

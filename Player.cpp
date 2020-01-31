@@ -71,16 +71,6 @@ void Player::resetStars()
 	setMaxFire(1);
 }
 
-bool Player::isSpawning() const
-{
-	return spawning;
-}
-
-void Player::setSpawning(bool spawning)
-{
-	this->spawning = spawning;
-}
-
 void Player::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	Entity::draw(target, states);

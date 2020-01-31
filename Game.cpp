@@ -30,12 +30,20 @@ Game::Game(RenderWindow& mWindow)
     player = new Player(texture, { 0,0,13,13 }, {64,144, 16,16});
     player->addShield(4.f);
 
-    pSpawner = new TankSpawner(texture, player, 1.2f, pSpawnPos);
+    pSpawner = new TankSpawner(texture, pSpawnPos);
 
     // Load sounds
     soundSys.loadSounds("resources\\sounds");
 
     falcon.setPosition({13.f * bs,25.f * bs });
+
+    // Create the enemy spawners
+    float grndsize = grnd.getTileSize() * grnd.getDim().x;
+    enemy_spawners = new TankSpawner[nEnSpawners] {
+        TankSpawner(texture, {16.f, 16.f}),
+        TankSpawner(texture, {grndsize/2, 16.f}),
+        TankSpawner(texture, {grndsize-16.f, 16.f})
+    };
 }
 
 void Game::update(float dt)
@@ -80,7 +88,7 @@ void Game::update(float dt)
 
         // Player update
         bool pmovesound_new = true;
-        if (!player->isSpawning()) {
+        if (!pSpawner->isSpawning()) {
             if (Kbd::isKeyPressed(KbdKey::W)) {
                 player->setVel({ 0.0f, -100.0f });
             }
@@ -130,7 +138,7 @@ void Game::update(float dt)
             pmovesound_new = false;
             pSpawner->update(dt);
             if (pSpawner->mustSpawn())
-                player->setSpawning(false);
+                pSpawner->spawnTank();
         }
 
         // toggles between move and idle sounds
@@ -381,18 +389,15 @@ void Game::update(float dt)
         ctrlNumEnemies();
 
         // Update enemy_spawners
-        if (enemy_spawners.size() > 0) {
-            auto sp_it = enemy_spawners.end();
-            do {
-                sp_it--;
-                TankSpawner* ts = *sp_it;
-                ts->update(dt);
-                if (ts->mustSpawn()) {
-                    enemies.push_front(dynamic_cast<Enemy*>(ts->getTank()));
-                    delete ts;
-                    sp_it = enemy_spawners.erase(sp_it);
+        for (int i = 0; i < nEnSpawners; i++) {
+            if (enemy_spawners[i].isSpawning()) {
+                enemy_spawners[i].update(dt);
+                if (enemy_spawners[i].mustSpawn()) {
+                    enemies.push_front(dynamic_cast<Enemy*>
+                        (enemy_spawners[i].spawnTank()));
+                    spawningCount--;
                 }
-            } while (sp_it != enemy_spawners.begin());
+            }
         }
 
         if (Kbd::startedPressKey(KbdKey::I)) {
@@ -432,8 +437,7 @@ void Game::update(float dt)
             curScreen = Screen::playScreen;
             player->setPosition(pSpawnPos);
             player->addShield(4.f);
-            pSpawner->reset();
-            player->setSpawning();
+            pSpawner->startSpawn(player);
             resetGame();
             loadLevel(hud.getSelStage());
             hud.resetEnemCounter();
@@ -513,7 +517,7 @@ void Game::draw()
     case Screen::gameOver:
         area_grnd.draw(grnd);
         area_grnd.draw(falcon);
-        if (player->isSpawning())
+        if (pSpawner->isSpawning())
             area_grnd.draw(*pSpawner);
         else
             area_grnd.draw(*player);
@@ -526,8 +530,9 @@ void Game::draw()
             area_grnd.draw(*e);
         if (bonus)
             area_grnd.draw(*bonus);
-        for (auto s : enemy_spawners)
-            area_grnd.draw(*s);
+        for (int i = 0; i < nEnSpawners; i++)
+            if(enemy_spawners[i].isSpawning())
+                area_grnd.draw(enemy_spawners[i]);
         break;
     case Screen::nextStage:
     case Screen::selectStage:
@@ -557,11 +562,9 @@ void Game::draw()
 void Game::ctrlNumEnemies()
 {
     // check if can spawn an enemy
-    if (totalSpawnedEnemies < totalEnemies && int(enemies.size() + enemy_spawners.size()) < maxEnemies) {
+    if (totalSpawnedEnemies < totalEnemies && spawningCount < nEnSpawners
+        && int(enemies.size() + spawningCount) < maxEnemies) {
         if (enemySpawnDist(rng) == 0) {
-            // calc spawn position
-            float halfgrnd = (grnd.getTileSize() * grnd.getDim().x) / 2.f;
-            float x = 16.f + enemyPosDist(rng) * (halfgrnd-16.f);
             // calc type
             discrete_distribution<int> typedist { (double)nBasicTank,
                 (double)nSpeedTank, (double)nPowerTank, (double)nArmorTank};
@@ -597,7 +600,14 @@ void Game::ctrlNumEnemies()
             if (enemyBonusMarkDist(rng) > 9) {
                 enem->setBonusMark();
             }
-            enemy_spawners.emplace_front(new TankSpawner(texture, enem, 1.2f, { x, 16.f }));
+            // construct a distribution to select the spawner
+            float sp[nEnSpawners];
+            for (int i = 0; i < nEnSpawners; i++)
+                sp[i] = (enemy_spawners[i].isSpawning()) ? 0.0 : 1.0;
+            discrete_distribution<int> sp_dis{ std::begin(sp), std::end(sp) };
+
+            enemy_spawners[sp_dis(rng)].startSpawn(enem);
+            spawningCount++;
             hud.removeEnemy();
         }
     }
@@ -656,8 +666,7 @@ void Game::resetPlayer()
     player->addShield(4.f);
     player->resetStars();
     player->setHealth(1);
-    pSpawner->reset();
-    player->setSpawning();
+    pSpawner->startSpawn(player);
     hud.setLifes(player->getNumLifes());
     player->resetFireCounter();
 }
@@ -674,18 +683,22 @@ void Game::resetGame()
         delete bonus;
         bonus = nullptr;
     }
-    for (auto s : enemy_spawners)
-        delete s;
     bullets.clear();
     enemies.clear();
     explosions.clear();
-    enemy_spawners.clear();
     totalSpawnedEnemies = 0;
     pmovesound = false;
+    // you can exit while is spawning
+    // then it is necessary to reset
+    for (int i = 0; i < nEnSpawners; i++)
+        enemy_spawners[i].startSpawn(nullptr);
+    spawningCount = 0;
 }
 
 Game::~Game()
 {
     resetGame();
     delete player;
+    delete pSpawner;
+    delete[] enemy_spawners;
 }
