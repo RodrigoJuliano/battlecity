@@ -10,6 +10,8 @@
 #include "Player.h"
 #include "Hud.h"
 #include "TankSpawner.h"
+#include "Vec2.h"
+#include "Screen.h"
 #include <SFML/Graphics.hpp>
 #include <list>
 #include <random>

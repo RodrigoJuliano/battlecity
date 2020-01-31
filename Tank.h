@@ -2,7 +2,7 @@
 
 #include "Entity.h"
 #include "Ground.h"
-#include "Graphics.h"
+#include "Gfx.h"
 #include "Bullet.h"
 
 class Tank : public Entity

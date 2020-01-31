@@ -1,5 +1,5 @@
 #include "Hud.h"
-#include "Graphics.h"
+#include "Gfx.h"
 
 Hud::Hud(Texture& tex, Screen& curScreen, int numStages)
     :

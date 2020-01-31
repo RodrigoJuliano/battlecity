@@ -1,9 +1,9 @@
 #include "Game.h"
-#include "Graphics.h"
+#include "Gfx.h"
+#include "Kbd.h"
 #include <iostream>
 #include <string>
 #include <fstream>
-#include "Kbd.h"
 
 Game::Game(RenderWindow& mWindow)
     :
@@ -38,7 +38,7 @@ Game::Game(RenderWindow& mWindow)
     falcon.setPosition({13.f * bs,25.f * bs });
 
     // Create the enemy spawners
-    float grndsize = grnd.getTileSize() * grnd.getDim().x;
+    float grndsize = float(grnd.getTileSize() * grnd.getDim().x);
     enemy_spawners = new TankSpawner[nEnSpawners] {
         TankSpawner(texture, {16.f, 16.f}),
         TankSpawner(texture, {grndsize/2, 16.f}),
@@ -601,7 +601,7 @@ void Game::ctrlNumEnemies()
                 enem->setBonusMark();
             }
             // construct a distribution to select the spawner
-            float sp[nEnSpawners];
+            double sp[nEnSpawners];
             for (int i = 0; i < nEnSpawners; i++)
                 sp[i] = (enemy_spawners[i].isSpawning()) ? 0.0 : 1.0;
             discrete_distribution<int> sp_dis{ std::begin(sp), std::end(sp) };

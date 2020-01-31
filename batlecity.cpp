@@ -1,6 +1,6 @@
 
 #include "Game.h"
-#include "Graphics.h"
+#include "Gfx.h"
 
 int main()
 {

@@ -187,16 +187,18 @@
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Explosion.h" />
     <ClInclude Include="Game.h" />
-    <ClInclude Include="Graphics.h" />
+    <ClInclude Include="Gfx.h" />
     <ClInclude Include="Ground.h" />
     <ClInclude Include="Hud.h" />
     <ClInclude Include="Kbd.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Screen.h" />
     <ClInclude Include="SoundSystem.h" />
     <ClInclude Include="Tank.h" />
     <ClInclude Include="ScreenArea.h" />
     <ClInclude Include="TankSpawner.h" />
     <ClInclude Include="TileMap.h" />
+    <ClInclude Include="Vec2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

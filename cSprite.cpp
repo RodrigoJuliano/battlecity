@@ -1,4 +1,5 @@
 #include "cSprite.h"
+#include "Vec2.h"
 
 cSprite::cSprite(Texture& tex, IntRect firstframe, int nFrames,
 	float collSize, float frameTime, float scale)
@@ -14,15 +15,15 @@ cSprite::cSprite(Texture& tex, IntRect firstframe, int nFrames,
 
 void cSprite::constructShape()
 {
-	shape[0].position = Vec2(0.f, 0.f);
-	shape[1].position = Vec2(fframe.width, 0.f);
-	shape[2].position = Vec2(fframe.width, fframe.height);
-	shape[3].position = Vec2(0.f, fframe.height);
+	shape[0].position = {0.f, 0.f};
+	shape[1].position = {float(fframe.width), 0.f};
+	shape[2].position = {float(fframe.width), float(fframe.height)};
+	shape[3].position = {0.f, float(fframe.height)};
 
-	shape[0].texCoords = Vec2(fframe.left, fframe.top);
-	shape[1].texCoords = Vec2(fframe.left + fframe.width, fframe.top);
-	shape[2].texCoords = Vec2(fframe.left + fframe.width, fframe.top + fframe.height);
-	shape[3].texCoords = Vec2(fframe.left, fframe.top + fframe.height);
+	shape[0].texCoords = {float(fframe.left), float(fframe.top)};
+	shape[1].texCoords = {float(fframe.left + fframe.width), float(fframe.top)};
+	shape[2].texCoords = {float(fframe.left + fframe.width), float(fframe.top + fframe.height)};
+	shape[3].texCoords = {float(fframe.left), float(fframe.top + fframe.height)};
 
 	setOrigin({ fframe.width * 0.5f, fframe.height * 0.5f });
 	setScale(scale, scale);
@@ -42,10 +43,10 @@ void cSprite::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 void cSprite::onFrameChanged()
 {
-	shape[0].texCoords = Vec2(fframe.left + fframe.width * curFrame, fframe.top);
-	shape[1].texCoords = Vec2(fframe.left + fframe.width * (curFrame + 1), fframe.top);
-	shape[2].texCoords = Vec2(fframe.left + fframe.width * (curFrame + 1), fframe.top + fframe.height);
-	shape[3].texCoords = Vec2(fframe.left + fframe.width * curFrame, fframe.top + fframe.height);
+	shape[0].texCoords = {float(fframe.left + fframe.width * curFrame), float(fframe.top)};
+	shape[1].texCoords = {float(fframe.left + fframe.width * (curFrame + 1)), float(fframe.top)};
+	shape[2].texCoords = {float(fframe.left + fframe.width * (curFrame + 1)), float(fframe.top + fframe.height)};
+	shape[3].texCoords = {float(fframe.left + fframe.width * curFrame), float(fframe.top + fframe.height)};
 }
 
 FloatRect cSprite::getCollisionBox() const

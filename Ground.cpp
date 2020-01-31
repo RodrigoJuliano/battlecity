@@ -12,8 +12,8 @@ Ground::Ground(Vei2 dimension, int tileSize, Texture& tex, int texRes,
 
 void Ground::onFrameChanged()
 {
-	for (unsigned int i = 0; i < dim.x; ++i)
-		for (unsigned int j = 0; j < dim.y; ++j) {
+	for (int i = 0; i < dim.x; ++i)
+		for (int j = 0; j < dim.y; ++j) {
 
 			int id;
 			if ((id = mMap[j * dim.y + i]) == 4) { // water tile
@@ -26,10 +26,10 @@ void Ground::onFrameChanged()
 				int tv = id / tilesPerRow;
 
 				// define its 4 texture coordinates
-				quad[0].texCoords = Vec2(texOring.x + tu * texRes, texOring.y + tv * texRes);
-				quad[1].texCoords = Vec2(texOring.x + (tu + 1) * texRes, texOring.y + tv * texRes);
-				quad[2].texCoords = Vec2(texOring.x + (tu + 1) * texRes, texOring.y + (tv + 1) * texRes);
-				quad[3].texCoords = Vec2(texOring.x + tu * texRes, texOring.y + (tv + 1) * texRes);
+				quad[0].texCoords = {float(texOring.x + tu * texRes), float(texOring.y + tv * texRes)};
+				quad[1].texCoords = {float(texOring.x + (tu + 1) * texRes), float(texOring.y + tv * texRes)};
+				quad[2].texCoords = {float(texOring.x + (tu + 1) * texRes), float(texOring.y + (tv + 1) * texRes)};
+				quad[3].texCoords = {float(texOring.x + tu * texRes), float(texOring.y + (tv + 1) * texRes)};
 			}
 		}
 }
@@ -47,8 +47,8 @@ bool Ground::saveToFile(std::string file)
 	f << 4 << " ";
 	f << 3 << " \n";
 
-	for (unsigned int i = 0; i < dim.x; ++i) {
-		for (unsigned int j = 0; j < dim.y; ++j) {
+	for (int i = 0; i < dim.x; ++i) {
+		for (int j = 0; j < dim.y; ++j) {
 			f << mMap[j * dim.x + i] << " ";
 		}
 		f << "\n";
@@ -60,8 +60,8 @@ bool Ground::saveToFile(std::string file)
 bool Ground::loadFromStream(std::istream& stream)
 {
 	int b;
-	for (unsigned int i = 0; i < dim.x; ++i) {
-		for (unsigned int j = 0; j < dim.y; ++j) {
+	for (int i = 0; i < dim.x; ++i) {
+		for (int j = 0; j < dim.y; ++j) {
 			stream >> b;
 			setBlock(i, j, b);
 		}

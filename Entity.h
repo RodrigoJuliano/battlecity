@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Graphics.h"
+#include "Gfx.h"
+#include "Vec2.h"
 #include "cSprite.h"
 #include "Ground.h"
 

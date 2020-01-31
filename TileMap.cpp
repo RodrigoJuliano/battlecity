@@ -1,5 +1,4 @@
 #include "TileMap.h"
-
 #include "Ground.h"
 #include <fstream>
 
@@ -39,10 +38,10 @@ void TileMap::setBlock(int x, int y, int block)
 		int tv = block / tilesPerRow;
 
 		// define its 4 texture coordinates
-		quad[0].texCoords = Vec2(texOring.x + tu * texRes, texOring.y + tv * texRes);
-		quad[1].texCoords = Vec2(texOring.x + (tu + 1) * texRes, texOring.y + tv * texRes);
-		quad[2].texCoords = Vec2(texOring.x + (tu + 1) * texRes, texOring.y + (tv + 1) * texRes);
-		quad[3].texCoords = Vec2(texOring.x + tu * texRes, texOring.y + (tv + 1) * texRes);
+		quad[0].texCoords = {float(texOring.x + tu * texRes), float(texOring.y + tv * texRes)};
+		quad[1].texCoords = {float(texOring.x + (tu + 1) * texRes), float(texOring.y + tv * texRes)};
+		quad[2].texCoords = {float(texOring.x + (tu + 1) * texRes), float(texOring.y + (tv + 1) * texRes)};
+		quad[3].texCoords = {float(texOring.x + tu * texRes), float(texOring.y + (tv + 1) * texRes)};
 	}
 	else {
 		quad[0].texCoords =
@@ -66,8 +65,8 @@ TileMap::TileMap(Vei2 dimension, int tileSize, Texture& tex, int texRes,
 	m_vertices.setPrimitiveType(sf::Quads);
 	m_vertices.resize(dim.x * dim.y * 4);
 
-	for (unsigned int i = 0; i < dim.x; ++i)
-		for (unsigned int j = 0; j < dim.y; ++j)
+	for (int i = 0; i < dim.x; ++i)
+		for (int j = 0; j < dim.y; ++j)
 		{
 			// initializes with empty
 			mMap[j * dim.x + i] = -1;
@@ -76,10 +75,10 @@ TileMap::TileMap(Vei2 dimension, int tileSize, Texture& tex, int texRes,
 			sf::Vertex* quad = &m_vertices[(i + j * dim.x) * 4];
 
 			// define its 4 corners
-			quad[0].position = Vec2(i * tileSize, j * tileSize);
-			quad[1].position = Vec2((i + 1) * tileSize, j * tileSize);
-			quad[2].position = Vec2((i + 1) * tileSize, (j + 1) * tileSize);
-			quad[3].position = Vec2(i * tileSize, (j + 1) * tileSize);
+			quad[0].position = {float(i * tileSize), float(j * tileSize)};
+			quad[1].position = {float((i + 1) * tileSize), float(j * tileSize)};
+			quad[2].position = {float((i + 1) * tileSize), float((j + 1) * tileSize)};
+			quad[3].position = {float(i * tileSize), float((j + 1) * tileSize)};
 		}
 }
 

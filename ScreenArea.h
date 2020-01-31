@@ -1,5 +1,7 @@
 #pragma once
-#include "Graphics.h"
+
+#include "Gfx.h"
+#include "Vec2.h"
 #include <SFML/Graphics.hpp>
 
 using namespace sf;
